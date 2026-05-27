@@ -21,6 +21,15 @@ public class Appointment {
     @SerializedName("notes")
     private String notes;
 
+    @SerializedName("price")
+    private Double price;
+
+    @SerializedName("paymentMethod")
+    private String paymentMethod;
+
+    @SerializedName("paymentStatus")
+    private String paymentStatus;
+
     public String getId() {
         return id;
     }
@@ -43,5 +52,17 @@ public class Appointment {
 
     public String getNotes() {
         return notes;
+    }
+
+    public Double getPrice() {
+        return price;
+    }
+
+    public String getPaymentMethod() {
+        return paymentMethod;
+    }
+
+    public String getPaymentStatus() {
+        return paymentStatus;
     }
 }
