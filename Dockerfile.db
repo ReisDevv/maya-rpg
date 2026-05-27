@@ -1,0 +1,7 @@
+FROM postgres:16-alpine
+
+ENV POSTGRES_DB=maya_rpg
+ENV POSTGRES_USER=maya_user
+ENV POSTGRES_PASSWORD=maya_pass
+
+EXPOSE 5432
