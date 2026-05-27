@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  Ícone Maya Fisioterapia
-  Viewport 108×108 (Android adaptive icon safe zone: 72×72 centrado em 18,18)
-  Cores: teal #3EBAD2 (figura) · salmão #EE715F (texto MAYA) · branco #FFFFFF (fundo via background)
+  Ícone Maya Fisioterapia — viewport 108×108
+  Safe zone (área visível garantida): 72×72 centrada em (18,18)
+  Figura: mdi:meditation (postura lótus) — viewBox 24×24 escalado 3× e centrado
+  Texto: "MAYA" desenhado como paths preenchidos na base
+  Cores: teal #3EBAD2 (figura + linha) · salmão #EE715F (texto)
 -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp"
@@ -10,100 +12,52 @@
     android:viewportWidth="108"
     android:viewportHeight="108">
 
-    <!-- ══════════ FIGURA YOGA – postura árvore ══════════ -->
-
-    <!-- Cabeça (círculo centrado em 54,24 r=6) -->
-    <path
-        android:fillColor="#3EBAD2"
-        android:pathData="M54,18 a6,6 0 1,0 0.001,0 z" />
-
-    <!-- Tronco vertical (54 é o centro, largura 4) -->
-    <path
-        android:fillColor="#3EBAD2"
-        android:pathData="M52,31 L52,53 L56,53 L56,31 Z" />
-
-    <!-- Braço esquerdo – levantado em V aberto -->
-    <path
-        android:strokeColor="#3EBAD2"
-        android:strokeWidth="3.5"
-        android:strokeLineCap="round"
-        android:fillColor="#00000000"
-        android:pathData="M52,36 Q44,29 40,24" />
-
-    <!-- Braço direito – levantado em V aberto -->
-    <path
-        android:strokeColor="#3EBAD2"
-        android:strokeWidth="3.5"
-        android:strokeLineCap="round"
-        android:fillColor="#00000000"
-        android:pathData="M56,36 Q64,29 68,24" />
-
-    <!-- Perna esquerda – apoio reto -->
-    <path
-        android:fillColor="#3EBAD2"
-        android:pathData="M50.5,53 L49,70 L53,70 L54,53 Z" />
-
-    <!-- Perna direita – dobrada, joelho para fora (postura árvore) -->
-    <path
-        android:strokeColor="#3EBAD2"
-        android:strokeWidth="3.5"
-        android:strokeLineCap="round"
-        android:fillColor="#00000000"
-        android:pathData="M56,53 Q63,59 60,67" />
-
-    <!-- Pé direito encostado na canela esquerda -->
-    <path
-        android:strokeColor="#3EBAD2"
-        android:strokeWidth="3"
-        android:strokeLineCap="round"
-        android:fillColor="#00000000"
-        android:pathData="M60,67 L52,62" />
-
-    <!-- ══════════ TEXTO "MAYA" ══════════ -->
     <!--
-      Letras desenhadas como paths preenchidos.
-      Baseline: y=86, altura das letras: 10, largura total: ~56px, início: x=26
-      Espaço por letra: 14px  →  M:26-38  A:40-52  Y:54-64  A:66-78  (+ serifa central)
+      mdi:meditation escalado de 24×24 para 72×72 (fator 3×)
+      e transladado para (18, 8) para centralizar horizontalmente
+      e posicionar na metade superior do ícone.
+      translateX=18, translateY=8, scale=3
+    -->
+    <group
+        android:translateX="18"
+        android:translateY="8"
+        android:scaleX="3"
+        android:scaleY="3">
+        <path
+            android:fillColor="#3EBAD2"
+            android:pathData="M12,4C13.11,4 14,4.89 14,6C14,7.11 13.11,8 12,8C10.9,8 10,7.11 10,6C10,4.9 10.9,4 12,4M21,16V14C18.76,14 16.84,13.04 15.4,11.32L14.06,9.72C13.68,9.26 13.12,9 12.53,9H11.47C10.88,9 10.32,9.26 9.94,9.72L8.6,11.32C7.16,13.04 5.24,14 3,14V16C5.77,16 8.19,14.83 10,12.75V15L6.12,16.55C5.45,16.82 5,17.5 5,18.21C5,19.2 5.8,20 6.79,20H9V19.5C9,18.12 10.12,17 11.5,17H12.5C12.78,17 13,17.22 13,17.5C13,17.78 12.78,18 12.5,18H11.5C10.67,18 10,18.67 10,19.5V20H17.21C18.2,20 19,19.2 19,18.21C19,17.5 18.55,16.82 17.88,16.55L14,15V12.75C15.81,14.83 18.23,16 21,16Z" />
+    </group>
+
+    <!--
+      Texto "MAYA" em salmão — paths manuais, zona 22..86 em x, base y=98
+      Cada letra tem ~13px de largura, gap de 2px → total ~58px
+      Início x=25 para centralizar em 108px
+      M:25-37  A:39-51  Y:53-63  A:65-77
     -->
 
-    <!-- M  (x=26..38) -->
+    <!-- M -->
     <path
         android:fillColor="#EE715F"
-        android:pathData="
-          M26,86 L26,76
-          L28,76 L31,81.5 L34,76
-          L36,76 L36,86
-          L34,86 L34,80 L31,84.5 L28,80 L28,86 Z" />
+        android:pathData="M25,98 L25,88 L27.5,88 L31,93.5 L34.5,88 L37,88 L37,98 L34.5,98 L34.5,91.5 L31,96.5 L27.5,91.5 L27.5,98 Z" />
 
-    <!-- A  (x=40..52, pico em 46) -->
+    <!-- A (pico em 45) -->
     <path
         android:fillColor="#EE715F"
-        android:pathData="
-          M40,86 L46,76 L52,86
-          L49.5,86 L48.5,83.5
-          L43.5,83.5 L42.5,86 Z
-          M44.4,81.5 L47.6,81.5 L46,78.5 Z" />
+        android:pathData="M39,98 L45,88 L51,98 L48.2,98 L47,95 L43,95 L41.8,98 Z M43.9,93 L46.1,93 L45,90.5 Z" />
 
-    <!-- Y  (x=54..64) -->
+    <!-- Y -->
     <path
         android:fillColor="#EE715F"
-        android:pathData="
-          M54,76 L59,81.5 L64,76
-          L64,78.5 L60.2,83 L60.2,86
-          L57.8,86 L57.8,83 L54,78.5 Z" />
+        android:pathData="M53,88 L58,93.5 L63,88 L63,91 L59.3,95 L59.3,98 L56.7,98 L56.7,95 L53,91 Z" />
 
-    <!-- A  (x=66..78, pico em 72) -->
+    <!-- A (pico em 71) -->
     <path
         android:fillColor="#EE715F"
-        android:pathData="
-          M66,86 L72,76 L78,86
-          L75.5,86 L74.5,83.5
-          L69.5,83.5 L68.5,86 Z
-          M70.4,81.5 L73.6,81.5 L72,78.5 Z" />
+        android:pathData="M65,98 L71,88 L77,98 L74.2,98 L73,95 L69,95 L67.8,98 Z M69.9,93 L72.1,93 L71,90.5 Z" />
 
     <!-- Linha decorativa teal abaixo do texto -->
     <path
         android:fillColor="#3EBAD2"
-        android:pathData="M26,88.5 Q54,91 82,88.5 L82,90 Q54,92.5 26,90 Z" />
+        android:pathData="M22,100 Q54,103 86,100 L86,101.5 Q54,104.5 22,101.5 Z" />
 
 </vector>
