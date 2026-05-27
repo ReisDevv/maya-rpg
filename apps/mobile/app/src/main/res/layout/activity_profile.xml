@@ -64,6 +64,7 @@
                     android:padding="20dp">
 
                     <FrameLayout
+                        android:id="@+id/frameAvatar"
                         android:layout_width="80dp"
                         android:layout_height="80dp"
                         app:layout_constraintEnd_toEndOf="parent"
@@ -102,7 +103,7 @@
                         android:textStyle="bold"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@id/ivProfileAvatar" />
+                        app:layout_constraintTop_toBottomOf="@id/frameAvatar" />
 
                     <TextView
                         android:id="@+id/tvEmail"

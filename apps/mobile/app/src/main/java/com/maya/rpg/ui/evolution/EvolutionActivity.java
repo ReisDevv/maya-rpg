@@ -66,6 +66,8 @@ public class EvolutionActivity extends BaseAuthActivity {
 
         chartEvolution = findViewById(R.id.chartEvolution);
         chartFrequency = findViewById(R.id.chartFrequency);
+        chartEvolution.setNoDataText("Carregando dados...");
+        chartFrequency.setNoDataText("Carregando dados...");
         tabPain = findViewById(R.id.tabPain);
         tabImprovement = findViewById(R.id.tabImprovement);
         tabFrequency = findViewById(R.id.tabFrequency);
@@ -77,6 +79,15 @@ public class EvolutionActivity extends BaseAuthActivity {
 
         setupTabs();
         setupBottomNav();
+        // Ativa tab "Dor" como padrão visualmente
+        resetTabs();
+        tabPain.setBackgroundResource(R.drawable.bg_tab_selected);
+        tabPain.setTextColor(Color.WHITE);
+        tabPain.setTypeface(null, android.graphics.Typeface.BOLD);
+        android.content.res.ColorStateList white = android.content.res.ColorStateList.valueOf(Color.WHITE);
+        androidx.core.widget.TextViewCompat.setCompoundDrawableTintList(tabPain, white);
+        chartFrequency.setVisibility(View.GONE);
+        chartEvolution.setVisibility(View.VISIBLE);
         loadHistory();
         loadMedicalRecords();
     }
@@ -393,7 +404,12 @@ public class EvolutionActivity extends BaseAuthActivity {
         chartEvolution.setVisibility(View.GONE);
         chartFrequency.setVisibility(View.VISIBLE);
 
-        if (checkInHistory.isEmpty()) { chartFrequency.clear(); chartFrequency.invalidate(); return; }
+        if (checkInHistory.isEmpty()) {
+            chartFrequency.clear();
+            chartFrequency.setNoDataText("Sem dados ainda — complete uma sessão!");
+            chartFrequency.invalidate();
+            return;
+        }
 
         Map<Integer, Integer> byDay = new HashMap<>();
         for (int d : new int[]{Calendar.MONDAY, Calendar.TUESDAY, Calendar.WEDNESDAY,

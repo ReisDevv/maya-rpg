@@ -24,12 +24,14 @@ import com.maya.rpg.ui.chat.ChatListActivity;
 import com.maya.rpg.ui.schedule.AgendaActivity;
 import com.maya.rpg.ui.schedule.ScheduleActivity;
 
-import com.maya.rpg.model.CheckInHistoryResponse;
+import com.maya.rpg.db.AppDatabase;
+import com.maya.rpg.db.entity.ExerciseSession;
 import com.maya.rpg.model.NotificationItem;
 import com.maya.rpg.model.PaginatedResponse;
 import android.widget.ProgressBar;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.Executors;
 import android.animation.ObjectAnimator;
 import android.view.animation.DecelerateInterpolator;
 import com.maya.rpg.ui.BaseAuthActivity;
@@ -151,6 +153,7 @@ public class HomeActivity extends BaseAuthActivity {
         loadNextAppointment();
         fetchAppointmentsForCalendar();
         checkUnreadNotifications();
+        loadEvolutionData();
     }
 
     private void initCalendar() {
@@ -181,12 +184,20 @@ public class HomeActivity extends BaseAuthActivity {
         Calendar tempCal = (Calendar) currentWeekCalendar.clone();
         SimpleDateFormat dayFormat = new SimpleDateFormat("EEE", new Locale("pt", "BR"));
         SimpleDateFormat numberFormat = new SimpleDateFormat("dd", Locale.getDefault());
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
 
         // Ao trocar de semana, desmarca seleção e esconde painel
         selectedDayIndex = -1;
         hideDayDetail();
 
+        // Verifica se hoje está nessa semana para pré-selecionar
+        String todayStr = dateFormat.format(Calendar.getInstance().getTime());
+        int todayIndex = -1;
+
         for (int i = 0; i < 5; i++) {
+            String dayStr = dateFormat.format(tempCal.getTime());
+            if (dayStr.equals(todayStr)) todayIndex = i;
+
             TextView tv = dayTextViews.get(i);
             String dayName = dayFormat.format(tempCal.getTime()).toUpperCase().substring(0, 3);
             String dayNumber = numberFormat.format(tempCal.getTime());
@@ -200,6 +211,11 @@ public class HomeActivity extends BaseAuthActivity {
             tv.setOnClickListener(v -> selectDay(dayIndex));
 
             tempCal.add(Calendar.DAY_OF_MONTH, 1);
+        }
+
+        // Pré-seleciona hoje se estiver na semana atual
+        if (todayIndex >= 0) {
+            selectedDayIndex = todayIndex;
         }
 
         fetchAppointmentsForCalendar();
@@ -461,69 +477,45 @@ public class HomeActivity extends BaseAuthActivity {
         TextView tvDays = findViewById(R.id.tvDays);
         if (pbEvolution == null || tvDays == null) return;
 
-        RetrofitClient.getApiService().getMyHistory(100).enqueue(new Callback<PaginatedResponse<CheckInHistoryResponse>>() {
-            @Override
-            public void onResponse(Call<PaginatedResponse<CheckInHistoryResponse>> call, Response<PaginatedResponse<CheckInHistoryResponse>> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    updateEvolutionUI(response.body().getData());
-                }
-            }
-
-            @Override
-            public void onFailure(Call<PaginatedResponse<CheckInHistoryResponse>> call, Throwable t) {
-                // Manter valores padrão em caso de erro
-            }
-        });
-    }
-
-    private void updateEvolutionUI(List<CheckInHistoryResponse> history) {
-        if (history == null) return;
-
-        Calendar now = Calendar.getInstance();
-        now.setFirstDayOfWeek(Calendar.MONDAY);
-        now.set(Calendar.HOUR_OF_DAY, 0);
-        now.set(Calendar.MINUTE, 0);
-        now.set(Calendar.SECOND, 0);
-        now.set(Calendar.MILLISECOND, 0);
-        
-        // Início da semana (Segunda-feira)
-        Calendar startOfWeek = (Calendar) now.clone();
+        // Calcula início da semana (segunda-feira)
+        Calendar startOfWeek = Calendar.getInstance();
+        startOfWeek.setFirstDayOfWeek(Calendar.MONDAY);
         startOfWeek.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
+        startOfWeek.set(Calendar.HOUR_OF_DAY, 0);
+        startOfWeek.set(Calendar.MINUTE, 0);
+        startOfWeek.set(Calendar.SECOND, 0);
+        startOfWeek.set(Calendar.MILLISECOND, 0);
+        long sinceMs = startOfWeek.getTimeInMillis();
 
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
-        Set<String> activeDays = new HashSet<>();
+        String patientId = TokenManager.getPatientId();
+        if (patientId == null) return;
 
-        for (CheckInHistoryResponse checkIn : history) {
-            if (checkIn.getExecutedAt() != null) {
-                try {
-                    // O formato costuma ser ISO8601 (yyyy-MM-dd'T'HH:mm:ss.SSSZ)
-                    String datePart = checkIn.getExecutedAt().substring(0, 10);
-                    Date checkInDate = new SimpleDateFormat("yyyy-MM-dd", Locale.US).parse(datePart);
-                    if (checkInDate != null && !checkInDate.before(startOfWeek.getTime())) {
-                        activeDays.add(datePart);
-                    }
-                } catch (Exception ignored) {}
+        // Lê do Room local para refletir exercícios imediatamente (antes do sync subir para API)
+        Executors.newSingleThreadExecutor().execute(() -> {
+            AppDatabase db = AppDatabase.getInstance(this);
+            List<ExerciseSession> sessions = db.exerciseSessionDao().getByPatientSince(patientId, sinceMs);
+
+            // Conta dias únicos com atividade
+            Set<String> activeDays = new HashSet<>();
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
+            for (ExerciseSession s : sessions) {
+                activeDays.add(sdf.format(new Date(s.getCompletedAt())));
             }
-        }
+            int daysCount = activeDays.size();
 
-        int daysCount = activeDays.size();
-        ProgressBar pbEvolution = findViewById(R.id.pbEvolution);
-        TextView tvDays = findViewById(R.id.tvDays);
-
-        if (tvDays != null) {
-            tvDays.setText(daysCount + "\ndias");
-        }
-
-        if (pbEvolution != null) {
-            // Meta de 3 dias
-            int targetProgress = (int) ((daysCount / 3.0) * 100);
-            if (targetProgress > 100) targetProgress = 100;
-            
-            // Animação da barra enchendo
-            ObjectAnimator animation = ObjectAnimator.ofInt(pbEvolution, "progress", 0, targetProgress);
-            animation.setDuration(1000); // 1 segundo de duração
-            animation.setInterpolator(new DecelerateInterpolator());
-            animation.start();
-        }
+            runOnUiThread(() -> {
+                if (isFinishing() || isDestroyed()) return;
+                TextView tv = findViewById(R.id.tvDays);
+                ProgressBar pb = findViewById(R.id.pbEvolution);
+                if (tv != null) tv.setText(daysCount + "\ndias");
+                if (pb != null) {
+                    int targetProgress = Math.min((int) ((daysCount / 3.0) * 100), 100);
+                    ObjectAnimator anim = ObjectAnimator.ofInt(pb, "progress", 0, targetProgress);
+                    anim.setDuration(800);
+                    anim.setInterpolator(new DecelerateInterpolator());
+                    anim.start();
+                }
+            });
+        });
     }
 }
