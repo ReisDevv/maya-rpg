@@ -461,7 +461,7 @@ public class HomeActivity extends BaseAuthActivity {
         TextView tvDays = findViewById(R.id.tvDays);
         if (pbEvolution == null || tvDays == null) return;
 
-        RetrofitClient.getApiService().getMyHistory().enqueue(new Callback<PaginatedResponse<CheckInHistoryResponse>>() {
+        RetrofitClient.getApiService().getMyHistory(100).enqueue(new Callback<PaginatedResponse<CheckInHistoryResponse>>() {
             @Override
             public void onResponse(Call<PaginatedResponse<CheckInHistoryResponse>> call, Response<PaginatedResponse<CheckInHistoryResponse>> response) {
                 if (response.isSuccessful() && response.body() != null) {

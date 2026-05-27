@@ -1,17 +1,16 @@
 package com.maya.rpg.ui.exercises;
 
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.slider.Slider;
 import com.google.gson.Gson;
 import com.maya.rpg.R;
 import com.maya.rpg.api.TokenManager;
@@ -31,10 +30,13 @@ public class RegisterPlanActivity extends BaseAuthActivity {
     private RecyclerView rvExercises;
     private EditText etNotes;
     private ConstraintLayout layoutSuccess;
-    private int selectedFeel = 3; // Neutral default
-    private int selectedPain = 3; // Neutral default
-    
+    private int selectedFeel = 3;
+    private int selectedPain = 3;
+
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
+
+    private static final String[] FEEL_LABELS = {"Exaustivo", "Desafiador", "Neutro", "Ideal", "Muito Leve"};
+    private static final String[] PAIN_LABELS = {"Muita Dor", "Incômodo", "Neutro", "Bem", "Muito Bem"};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,7 +59,7 @@ public class RegisterPlanActivity extends BaseAuthActivity {
         TextView tvSubtitle = findViewById(R.id.tvSubtitle);
         if (prescription != null) {
             tvSubtitle.setText(prescription.getTitle());
-            
+
             RegisterExerciseAdapter adapter = new RegisterExerciseAdapter(prescription.getExercises());
             rvExercises.setLayoutManager(new LinearLayoutManager(this));
             rvExercises.setAdapter(adapter);
@@ -69,48 +71,48 @@ public class RegisterPlanActivity extends BaseAuthActivity {
             finishAffinity();
         });
 
-        setupScaleListeners();
-
+        setupSliders();
         findViewById(R.id.btnFinalize).setOnClickListener(v -> finalizeRegistration());
     }
 
-    private void setupScaleListeners() {
-        // Feel Scale
-        int[] feelIds = {R.id.btnFeel1, R.id.btnFeel2, R.id.btnFeel3, R.id.btnFeel4, R.id.btnFeel5};
-        for (int i = 0; i < feelIds.length; i++) {
-            final int level = i + 1;
-            findViewById(feelIds[i]).setOnClickListener(v -> {
-                selectedFeel = level;
-                updateScaleUI(feelIds, selectedFeel);
-            });
-        }
+    private void setupSliders() {
+        // Feel slider — emojis: triste (esq) → feliz (dir)
+        View feelView = findViewById(R.id.layoutScaleFeel);
+        Slider feelSlider = feelView.findViewById(R.id.slider);
+        TextView feelValue = feelView.findViewById(R.id.tvSliderValue);
+        TextView feelLabel = feelView.findViewById(R.id.tvSliderLabel);
+        TextView feelLeft = feelView.findViewById(R.id.tvLabelLeft);
+        TextView feelRight = feelView.findViewById(R.id.tvLabelRight);
+        feelLeft.setText("😣");
+        feelRight.setText("😄");
+        feelSlider.setValue(3);
+        feelLabel.setText(FEEL_LABELS[2]);
+        feelValue.setText("3");
+        feelSlider.addOnChangeListener((slider, value, fromUser) -> {
+            int v = (int) value;
+            selectedFeel = v;
+            feelValue.setText(String.valueOf(v));
+            feelLabel.setText(FEEL_LABELS[v - 1]);
+        });
 
-        // Pain Scale
-        int[] painIds = {R.id.btnPain1, R.id.btnPain2, R.id.btnPain3, R.id.btnPain4, R.id.btnPain5};
-        for (int i = 0; i < painIds.length; i++) {
-            final int level = i + 1;
-            findViewById(painIds[i]).setOnClickListener(v -> {
-                selectedPain = level;
-                updateScaleUI(painIds, selectedPain);
-            });
-        }
-        
-        // Initialize UI
-        updateScaleUI(feelIds, selectedFeel);
-        updateScaleUI(painIds, selectedPain);
-    }
-
-    private void updateScaleUI(int[] ids, int selected) {
-        for (int i = 0; i < ids.length; i++) {
-            View v = findViewById(ids[i]);
-            if (i + 1 == selected) {
-                v.setBackgroundResource(R.drawable.bg_badge_active);
-                v.setAlpha(1.0f);
-            } else {
-                v.setBackground(null);
-                v.setAlpha(0.5f);
-            }
-        }
+        // Pain slider — emojis: dor (esq) → sem dor (dir)
+        View painView = findViewById(R.id.layoutScalePain);
+        Slider painSlider = painView.findViewById(R.id.slider);
+        TextView painValue = painView.findViewById(R.id.tvSliderValue);
+        TextView painLabel = painView.findViewById(R.id.tvSliderLabel);
+        TextView painLeft = painView.findViewById(R.id.tvLabelLeft);
+        TextView painRight = painView.findViewById(R.id.tvLabelRight);
+        painLeft.setText("😣");
+        painRight.setText("😊");
+        painSlider.setValue(3);
+        painLabel.setText(PAIN_LABELS[2]);
+        painValue.setText("3");
+        painSlider.addOnChangeListener((slider, value, fromUser) -> {
+            int v = (int) value;
+            selectedPain = v;
+            painValue.setText(String.valueOf(v));
+            painLabel.setText(PAIN_LABELS[v - 1]);
+        });
     }
 
     private void finalizeRegistration() {
@@ -130,17 +132,14 @@ public class RegisterPlanActivity extends BaseAuthActivity {
                 session.setCompletedAt(now);
                 session.setCompleted(true);
                 session.setFeelingLevel(selectedFeel);
-                // Normaliza escala 1-5 para 0-10 conforme contrato da API
-                session.setPainLevel(selectedPain * 2);
+                session.setPainLevel(selectedPain * 2); // normaliza 1-5 para 0-10
                 session.setNotes(notes);
                 session.setSynced(false);
-                
                 db.exerciseSessionDao().insert(session);
             }
 
             runOnUiThread(() -> {
                 layoutSuccess.setVisibility(View.VISIBLE);
-                // Trigger Sync
                 com.maya.rpg.db.OfflineManager.triggerSync(this);
             });
         });

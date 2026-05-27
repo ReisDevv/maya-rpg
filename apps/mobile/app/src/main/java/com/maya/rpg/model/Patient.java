@@ -36,4 +36,5 @@ public class Patient {
     public String getBirthDate() { return birthDate; }
     public String getStatus() { return status; }
     public String getNotes() { return notes; }
+    public String getProfilePhotoUrl() { return null; } // placeholder — API ainda não retorna campo de foto
 }

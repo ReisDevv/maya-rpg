@@ -18,6 +18,9 @@ public class CheckInHistoryResponse {
  @SerializedName("painLevel")
  private int painLevel;
 
+ @SerializedName("feelingLevel")
+ private int feelingLevel;
+
  @SerializedName("notes")
  private String notes;
 
@@ -32,6 +35,7 @@ public class CheckInHistoryResponse {
  public String getPrescriptionId() { return prescriptionId; }
  public String getExerciseId() { return exerciseId; }
  public int getPainLevel() { return painLevel; }
+ public int getFeelingLevel() { return feelingLevel; }
  public String getNotes() { return notes; }
  public boolean isCompleted() { return isCompleted; }
  public String getExecutedAt() { return executedAt; }

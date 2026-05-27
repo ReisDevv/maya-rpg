@@ -30,6 +30,12 @@ public class ReportAdapter extends RecyclerView.Adapter<ReportAdapter.ViewHolder
         ReportItem item = reports.get(position);
         holder.tvDate.setText(item.date);
         holder.tvTitle.setText(item.title);
+        if (item.body != null && !item.body.isEmpty()) {
+            holder.tvBody.setText(item.body);
+            holder.tvBody.setVisibility(View.VISIBLE);
+        } else {
+            holder.tvBody.setVisibility(View.GONE);
+        }
     }
 
     @Override
@@ -38,22 +44,25 @@ public class ReportAdapter extends RecyclerView.Adapter<ReportAdapter.ViewHolder
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView tvDate, tvTitle;
+        TextView tvDate, tvTitle, tvBody;
 
         ViewHolder(View itemView) {
             super(itemView);
             tvDate = itemView.findViewById(R.id.tvReportDate);
             tvTitle = itemView.findViewById(R.id.tvReportTitle);
+            tvBody = itemView.findViewById(R.id.tvReportBody);
         }
     }
 
     public static class ReportItem {
-        String date;
         String title;
+        String body;
+        String date;
 
-        public ReportItem(String date, String title) {
-            this.date = date;
+        public ReportItem(String title, String body, String date) {
             this.title = title;
+            this.body = body;
+            this.date = date;
         }
     }
 }

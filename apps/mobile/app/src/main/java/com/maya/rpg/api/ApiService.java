@@ -88,7 +88,10 @@ public interface ApiService {
     Call<List<Void>> syncCheckIns(@Body List<CheckInRequest> requests);
 
  @GET("check-ins/my-history")
- Call<PaginatedResponse<CheckInHistoryResponse>> getMyHistory();
+ Call<PaginatedResponse<CheckInHistoryResponse>> getMyHistory(@Query("pageSize") int pageSize);
+
+ @GET("medical-records/my")
+ Call<PaginatedResponse<com.maya.rpg.model.MedicalRecord>> getMyMedicalRecords();
 
     @PATCH("auth/fcm-token")
     Call<Void> updateFcmToken(@Body com.maya.rpg.model.FcmTokenRequest request);
