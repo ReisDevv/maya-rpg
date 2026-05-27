@@ -102,11 +102,15 @@
                     android:src="@drawable/img_varias_foto3"
                     android:visibility="visible" />
 
-                <!-- WebView para vídeo YouTube embed -->
-                <WebView
-                    android:id="@+id/wvVideo"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
+                <!-- Ícone de play sobreposto ao thumbnail do YouTube -->
+                <ImageView
+                    android:id="@+id/ivPlayButton"
+                    android:layout_width="64dp"
+                    android:layout_height="64dp"
+                    android:layout_gravity="center"
+                    android:src="@android:drawable/ic_media_play"
+                    android:background="#99000000"
+                    android:padding="18dp"
                     android:visibility="gone" />
 
                 <!-- Badge "Abrir mídia completa" no canto -->
