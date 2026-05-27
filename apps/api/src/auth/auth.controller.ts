@@ -28,7 +28,7 @@ import { User } from './entities/user.entity';
 const REFRESH_COOKIE_OPTIONS: CookieOptions = {
   httpOnly: true,
   secure: true,
-  sameSite: 'strict',
+  sameSite: 'none', // necessário para cross-site (Vercel → Render em domínios diferentes)
   maxAge: 7 * 24 * 60 * 60 * 1000,
   path: '/api/auth/refresh',
 };
