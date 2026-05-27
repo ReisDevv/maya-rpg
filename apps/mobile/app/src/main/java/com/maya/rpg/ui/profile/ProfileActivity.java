@@ -5,6 +5,9 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatDelegate;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -65,7 +68,7 @@ public class ProfileActivity extends BaseAuthActivity {
         findViewById(R.id.rowDelete).setOnClickListener(comingSoon);
         findViewById(R.id.rowNotifications).setOnClickListener(comingSoon);
         findViewById(R.id.rowLanguage).setOnClickListener(comingSoon);
-        findViewById(R.id.rowTheme).setOnClickListener(comingSoon);
+        findViewById(R.id.rowTheme).setOnClickListener(v -> showThemePicker());
 
         // Pré-preenche com dados do token enquanto a API carrega
         String cachedName = TokenManager.getUserName();
@@ -75,6 +78,45 @@ public class ProfileActivity extends BaseAuthActivity {
 
         loadPatientFromApi();
         setupBottomNav();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        loadSavedPhoto();
+    }
+
+    private void showThemePicker() {
+        int currentMode = AppCompatDelegate.getDefaultNightMode();
+        String[] options = {"Seguir o sistema", "Claro (Light)", "Escuro (Dark)"};
+        int[] modes = {
+            AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM,
+            AppCompatDelegate.MODE_NIGHT_NO,
+            AppCompatDelegate.MODE_NIGHT_YES
+        };
+        int checkedItem = 0;
+        for (int i = 0; i < modes.length; i++) {
+            if (modes[i] == currentMode) { checkedItem = i; break; }
+        }
+        new AlertDialog.Builder(this)
+                .setTitle("Tema do aplicativo")
+                .setSingleChoiceItems(options, checkedItem, (dialog, which) -> {
+                    AppCompatDelegate.setDefaultNightMode(modes[which]);
+                    getSharedPreferences("maya_prefs", MODE_PRIVATE)
+                            .edit().putInt("night_mode", modes[which]).apply();
+                    dialog.dismiss();
+                    recreate();
+                })
+                .setNegativeButton("Cancelar", null)
+                .show();
+    }
+
+    private void loadSavedPhoto() {
+        String savedUri = TokenManager.getProfilePhotoUri();
+        if (savedUri != null && !savedUri.isEmpty()) {
+            Glide.with(this).load(Uri.parse(savedUri)).circleCrop()
+                    .error(R.drawable.ic_person).into(ivProfileAvatar);
+        }
     }
 
     private void openImagePicker() {

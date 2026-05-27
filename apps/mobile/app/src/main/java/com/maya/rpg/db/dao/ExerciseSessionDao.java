@@ -31,6 +31,10 @@ public interface ExerciseSessionDao {
     @Query("UPDATE exercise_sessions SET isSynced = 1 WHERE id IN (:ids)")
     void markAsSynced(List<Integer> ids);
 
+    // Verifica se já existe sessão concluída para uma prescrição a partir de um timestamp
+    @Query("SELECT COUNT(*) FROM exercise_sessions WHERE patientId = :patientId AND prescriptionId = :prescriptionId AND completedAt >= :since AND completed = 1")
+    int countCompletedSince(String patientId, String prescriptionId, long since);
+
     // Apaga sessões já sincronizadas de um paciente — usado para refrescar o cache
     // a partir da fonte de verdade (API). Mantém pendentes (isSynced = 0) intactas
     // para não perder check-ins ainda não enviados ao backend.

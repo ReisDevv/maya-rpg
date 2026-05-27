@@ -1,20 +1,25 @@
 package com.maya.rpg.ui.exercises;
 
+import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+import com.google.android.material.button.MaterialButton;
 import com.maya.rpg.R;
+import com.maya.rpg.api.TokenManager;
+import com.maya.rpg.db.AppDatabase;
 import com.maya.rpg.model.Prescription;
+import java.util.Calendar;
 import java.util.List;
+import java.util.concurrent.Executors;
 
 public class PrescriptionAdapter extends RecyclerView.Adapter<PrescriptionAdapter.ViewHolder> {
 
     private List<Prescription> prescriptions;
-    private OnPrescriptionClickListener listener;
+    private final OnPrescriptionClickListener listener;
 
     public interface OnPrescriptionClickListener {
         void onStartClick(Prescription prescription);
@@ -51,33 +56,33 @@ public class PrescriptionAdapter extends RecyclerView.Adapter<PrescriptionAdapte
     static class ViewHolder extends RecyclerView.ViewHolder {
         View cardRoot;
         android.widget.ImageView ivIllustration;
-        TextView tvTitle, tvDescription, tvFrequency;
-        TextView chipExercises, chipSets, chipReps, chipTime;
-        android.widget.Button btnStart;
+        TextView tvTitle, tvDescription, tvLockStatus;
+        TextView tvFrequency, chipExercises, chipSets, chipReps, chipTime;
+        MaterialButton btnStart;
 
         ViewHolder(View itemView) {
             super(itemView);
-            cardRoot = itemView.findViewById(R.id.cardRoot);
+            cardRoot       = itemView.findViewById(R.id.cardRoot);
             ivIllustration = itemView.findViewById(R.id.ivIllustration);
-            tvTitle = itemView.findViewById(R.id.tvTitle);
-            tvDescription = itemView.findViewById(R.id.tvDescription);
-            tvFrequency = itemView.findViewById(R.id.tvFrequency);
-            chipExercises = itemView.findViewById(R.id.chipExercises);
-            chipSets = itemView.findViewById(R.id.chipSets);
-            chipReps = itemView.findViewById(R.id.chipReps);
-            chipTime = itemView.findViewById(R.id.chipTime);
-            btnStart = itemView.findViewById(R.id.btnStart);
+            tvTitle        = itemView.findViewById(R.id.tvTitle);
+            tvDescription  = itemView.findViewById(R.id.tvDescription);
+            tvLockStatus   = itemView.findViewById(R.id.tvLockStatus);
+            tvFrequency    = itemView.findViewById(R.id.tvFrequency);
+            chipExercises  = itemView.findViewById(R.id.chipExercises);
+            chipSets       = itemView.findViewById(R.id.chipSets);
+            chipReps       = itemView.findViewById(R.id.chipReps);
+            chipTime       = itemView.findViewById(R.id.chipTime);
+            btnStart       = itemView.findViewById(R.id.btnStart);
         }
 
         void bind(Prescription prescription, OnPrescriptionClickListener listener, int position) {
             tvTitle.setText(prescription.getTitle());
-            
-            // Logic for illustration and description based on title/content
-            if (prescription.getTitle().toLowerCase().contains("postural")) {
+
+            String title = prescription.getTitle().toLowerCase();
+            if (title.contains("postural")) {
                 ivIllustration.setImageResource(R.drawable.ombro_maya);
                 tvDescription.setText("Foco: Mobilidade, Consciência, Alinhamento");
-            } else if (prescription.getTitle().toLowerCase().contains("equilíbrio") || 
-                       prescription.getTitle().toLowerCase().contains("postura")) {
+            } else if (title.contains("equilíbrio") || title.contains("postura")) {
                 ivIllustration.setImageResource(R.drawable.ic_spine);
                 tvDescription.setText("Foco: Equilíbrio, Alongamento");
             } else {
@@ -85,15 +90,92 @@ public class PrescriptionAdapter extends RecyclerView.Adapter<PrescriptionAdapte
                 tvDescription.setText(prescription.getDescription() != null ? prescription.getDescription() : "");
             }
 
-            // Alternating card colors
             if (position % 2 == 0) {
                 cardRoot.setBackgroundResource(R.drawable.bg_card_beige_light);
             } else {
                 cardRoot.setBackgroundResource(R.drawable.bg_card_beige_dark);
             }
 
+            // Estado inicial: habilitado enquanto consulta o Room
+            applyUnlocked(prescription, listener);
+            tvLockStatus.setVisibility(View.GONE);
+
+            checkLockState(itemView.getContext(), prescription, listener);
+        }
+
+        private void applyUnlocked(Prescription prescription, OnPrescriptionClickListener listener) {
+            btnStart.setEnabled(true);
+            btnStart.setAlpha(1.0f);
+            btnStart.setText("INICIAR");
             btnStart.setOnClickListener(v -> listener.onStartClick(prescription));
             itemView.setOnClickListener(v -> listener.onStartClick(prescription));
+            itemView.setClickable(true);
+            itemView.setFocusable(true);
+        }
+
+        private void applyLocked(String lockLabel) {
+            btnStart.setEnabled(false);
+            btnStart.setAlpha(0.45f);
+            btnStart.setText("Já feito");
+            btnStart.setOnClickListener(null);
+            itemView.setOnClickListener(null);
+            itemView.setClickable(false);
+            itemView.setFocusable(false);
+            tvLockStatus.setText(lockLabel);
+            tvLockStatus.setVisibility(View.VISIBLE);
+        }
+
+        private void checkLockState(Context context, Prescription prescription, OnPrescriptionClickListener listener) {
+            String patientId = TokenManager.getPatientId();
+            if (patientId == null || prescription.getId() == null) return;
+
+            String frequency = resolveFrequency(prescription);
+            long since = getSince(frequency);
+
+            Executors.newSingleThreadExecutor().execute(() -> {
+                int count = AppDatabase.getInstance(context)
+                        .exerciseSessionDao()
+                        .countCompletedSince(patientId, prescription.getId(), since);
+
+                itemView.post(() -> {
+                    if (count > 0) {
+                        String label = "weekly".equalsIgnoreCase(frequency)
+                                ? "✓ Concluído esta semana"
+                                : "✓ Concluído hoje";
+                        applyLocked(label);
+                    } else {
+                        tvLockStatus.setVisibility(View.GONE);
+                        applyUnlocked(prescription, listener);
+                    }
+                });
+            });
+        }
+
+        /** Determina a frequência do plano a partir dos exercícios (campo frequency). */
+        private String resolveFrequency(Prescription prescription) {
+            if (prescription.getExercises() == null || prescription.getExercises().isEmpty()) {
+                return "daily";
+            }
+            for (Prescription.PrescriptionExercise pe : prescription.getExercises()) {
+                if (pe.getFrequency() != null && !pe.getFrequency().isEmpty()) {
+                    return pe.getFrequency();
+                }
+            }
+            return "daily";
+        }
+
+        /** Timestamp de início do período: meia-noite de hoje (diário) ou início da semana (semanal). */
+        private long getSince(String frequency) {
+            Calendar cal = Calendar.getInstance();
+            cal.set(Calendar.HOUR_OF_DAY, 0);
+            cal.set(Calendar.MINUTE, 0);
+            cal.set(Calendar.SECOND, 0);
+            cal.set(Calendar.MILLISECOND, 0);
+
+            if ("weekly".equalsIgnoreCase(frequency)) {
+                cal.set(Calendar.DAY_OF_WEEK, cal.getFirstDayOfWeek());
+            }
+            return cal.getTimeInMillis();
         }
     }
 }

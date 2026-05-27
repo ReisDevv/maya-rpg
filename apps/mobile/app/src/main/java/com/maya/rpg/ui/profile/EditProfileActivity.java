@@ -49,6 +49,12 @@ public class EditProfileActivity extends BaseAuthActivity {
                 if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
                     Uri uri = result.getData().getData();
                     if (uri != null) {
+                        // Persiste permissão de leitura para que a URI continue acessível após reinicialização
+                        try {
+                            getContentResolver().takePersistableUriPermission(uri,
+                                    Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                        } catch (Exception ignored) {}
+                        TokenManager.saveProfilePhotoUri(uri.toString());
                         Glide.with(this).load(uri).circleCrop().into(ivProfileAvatar);
                         Toast.makeText(this, "Foto atualizada", Toast.LENGTH_SHORT).show();
                     }
@@ -121,18 +127,25 @@ public class EditProfileActivity extends BaseAuthActivity {
                 .setTitle("Tema do aplicativo")
                 .setSingleChoiceItems(options, checkedItem, (dialog, which) -> {
                     AppCompatDelegate.setDefaultNightMode(modes[which]);
-                    // Persiste a escolha em SharedPreferences para restaurar ao abrir o app
                     getSharedPreferences("maya_prefs", MODE_PRIVATE)
                             .edit()
                             .putInt("night_mode", modes[which])
                             .apply();
                     dialog.dismiss();
+                    recreate();
                 })
                 .setNegativeButton("Cancelar", null)
                 .show();
     }
 
     private void loadProfile() {
+        // Carrega foto salva localmente
+        String savedPhotoUri = TokenManager.getProfilePhotoUri();
+        if (savedPhotoUri != null && !savedPhotoUri.isEmpty()) {
+            Glide.with(this).load(Uri.parse(savedPhotoUri)).circleCrop()
+                    .error(R.drawable.ic_person).into(ivProfileAvatar);
+        }
+
         // Pré-preenche com cache do token enquanto API responde
         String cached = TokenManager.getUserName();
         if (cached != null && !cached.isEmpty()) {

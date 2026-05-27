@@ -13,6 +13,7 @@ public class TokenManager {
     private static final String KEY_USER_NAME = "user_name";
     private static final String KEY_LGPD_ACCEPTED = "lgpd_accepted";
     private static final String KEY_FIRST_ACCESS = "first_access";
+    private static final String KEY_PROFILE_PHOTO_URI = "profile_photo_uri";
     private static SharedPreferences prefs;
 
     public static void init(Context context) {
@@ -114,6 +115,14 @@ public class TokenManager {
 
     public static boolean isFirstAccess() {
         return prefs != null && prefs.getBoolean(KEY_FIRST_ACCESS, false);
+    }
+
+    public static void saveProfilePhotoUri(String uri) {
+        if (prefs != null) prefs.edit().putString(KEY_PROFILE_PHOTO_URI, uri).apply();
+    }
+
+    public static String getProfilePhotoUri() {
+        return prefs != null ? prefs.getString(KEY_PROFILE_PHOTO_URI, null) : null;
     }
 
     public static void clearAll() {
