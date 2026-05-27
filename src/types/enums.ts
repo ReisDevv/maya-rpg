@@ -1,0 +1,20 @@
+export enum UserRole {
+  ADMIN = "ADMIN",
+  PROFESSIONAL = "PROFESSIONAL",
+  PATIENT = "PATIENT",
+}
+
+export enum PatientStatus {
+  ACTIVE = "ACTIVE",
+  INACTIVE = "INACTIVE",
+  PENDING = "PENDING",
+}
+
+export enum ExerciseCategory {
+  STRETCHING = "STRETCHING",
+  STRENGTHENING = "STRENGTHENING",
+  POSTURE = "POSTURE",
+  BREATHING = "BREATHING",
+  MOBILITY = "MOBILITY",
+  BALANCE = "BALANCE",
+}
