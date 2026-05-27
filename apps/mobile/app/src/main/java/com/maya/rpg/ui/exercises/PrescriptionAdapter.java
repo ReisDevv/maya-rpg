@@ -78,29 +78,23 @@ public class PrescriptionAdapter extends RecyclerView.Adapter<PrescriptionAdapte
         void bind(Prescription prescription, OnPrescriptionClickListener listener, int position) {
             tvTitle.setText(prescription.getTitle());
 
-            String title = prescription.getTitle().toLowerCase();
-            if (title.contains("postural")) {
-                ivIllustration.setImageResource(R.drawable.ombro_maya);
-                tvDescription.setText("Foco: Mobilidade, Consciência, Alinhamento");
-            } else if (title.contains("equilíbrio") || title.contains("postura")) {
-                ivIllustration.setImageResource(R.drawable.ic_spine);
-                tvDescription.setText("Foco: Equilíbrio, Alongamento");
-            } else {
-                ivIllustration.setImageResource(R.drawable.ic_nav_exercises);
-                tvDescription.setText(prescription.getDescription() != null ? prescription.getDescription() : "");
-            }
-
-            if (position % 2 == 0) {
-                cardRoot.setBackgroundResource(R.drawable.bg_card_beige_light);
-            } else {
-                cardRoot.setBackgroundResource(R.drawable.bg_card_beige_dark);
-            }
+            tvDescription.setText(prescription.getDescription() != null && !prescription.getDescription().isEmpty()
+                    ? prescription.getDescription()
+                    : formatExerciseCount(prescription));
 
             // Estado inicial: habilitado enquanto consulta o Room
             applyUnlocked(prescription, listener);
             tvLockStatus.setVisibility(View.GONE);
 
             checkLockState(itemView.getContext(), prescription, listener);
+        }
+
+        private String formatExerciseCount(Prescription prescription) {
+            if (prescription.getExercises() == null || prescription.getExercises().isEmpty()) {
+                return "Plano de exercícios";
+            }
+            int count = prescription.getExercises().size();
+            return count + " exercício" + (count != 1 ? "s" : "");
         }
 
         private void applyUnlocked(Prescription prescription, OnPrescriptionClickListener listener) {
