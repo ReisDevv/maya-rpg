@@ -14,6 +14,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.maya.rpg.R;
 import com.maya.rpg.api.RetrofitClient;
+import com.maya.rpg.api.TokenManager;
+import com.maya.rpg.db.AppDatabase;
+import com.maya.rpg.db.entity.ExerciseSession;
 import com.maya.rpg.model.CheckInHistoryResponse;
 import com.maya.rpg.model.MedicalRecord;
 import com.maya.rpg.model.PaginatedResponse;
@@ -25,12 +28,14 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Executors;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -65,34 +70,72 @@ public class EvolutionActivity extends BaseAuthActivity {
         findViewById(R.id.btnBack).setOnClickListener(v -> finish());
 
         setupBottomNav();
-        loadHistory();
+        loadHistoryLocal(); // mostra dados locais imediatamente
+        loadHistoryFromApi(); // substitui com dados da API quando chegar
         loadMedicalRecords();
     }
 
     // ─── DADOS ───────────────────────────────────────────────────────────────
 
-    private void loadHistory() {
+    // Lê do Room local para exibição imediata (inclui sessões ainda não sincronizadas)
+    private void loadHistoryLocal() {
+        String patientId = TokenManager.getPatientId();
+        if (patientId == null) return;
+
+        Executors.newSingleThreadExecutor().execute(() -> {
+            AppDatabase db = AppDatabase.getInstance(this);
+            List<ExerciseSession> sessions = db.exerciseSessionDao().getByPatient(patientId);
+
+            // Converte ExerciseSession → CheckInHistoryResponse para reutilizar a lógica de render
+            List<CheckInHistoryResponse> localHistory = new ArrayList<>();
+            SimpleDateFormat isoFmt = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US);
+            isoFmt.setTimeZone(java.util.TimeZone.getTimeZone("UTC"));
+
+            for (ExerciseSession s : sessions) {
+                CheckInHistoryResponse c = new CheckInHistoryResponse();
+                c.setPainLevel(s.getPainLevel());
+                c.setFeelingLevel(s.getFeelingLevel());
+                c.setExecutedAt(isoFmt.format(new Date(s.getCompletedAt())));
+                localHistory.add(c);
+            }
+
+            runOnUiThread(() -> {
+                if (isFinishing() || isDestroyed()) return;
+                if (!localHistory.isEmpty() && checkInHistory.isEmpty()) {
+                    checkInHistory = localHistory;
+                    renderStats();
+                    renderHeatmap();
+                    renderAchievements();
+                }
+            });
+        });
+    }
+
+    // Busca da API e atualiza com dados oficiais (inclui histórico completo)
+    private void loadHistoryFromApi() {
         RetrofitClient.getApiService().getMyHistory(200).enqueue(new Callback<PaginatedResponse<CheckInHistoryResponse>>() {
             @Override
             public void onResponse(Call<PaginatedResponse<CheckInHistoryResponse>> call,
                                    Response<PaginatedResponse<CheckInHistoryResponse>> response) {
                 if (response.isSuccessful() && response.body() != null
-                        && response.body().getData() != null) {
+                        && response.body().getData() != null
+                        && !response.body().getData().isEmpty()) {
                     checkInHistory = response.body().getData();
-                } else {
-                    checkInHistory = new ArrayList<>();
+                    renderStats();
+                    renderHeatmap();
+                    renderAchievements();
                 }
-                renderStats();
-                renderHeatmap();
-                renderAchievements();
+                // Se API retornar vazio e local já renderizou, mantém o que tem
             }
 
             @Override
             public void onFailure(Call<PaginatedResponse<CheckInHistoryResponse>> call, Throwable t) {
-                checkInHistory = new ArrayList<>();
-                renderStats();
-                renderHeatmap();
-                renderAchievements();
+                // Mantém dados locais se já foram carregados
+                if (checkInHistory.isEmpty()) {
+                    renderStats();
+                    renderHeatmap();
+                    renderAchievements();
+                }
             }
         });
     }

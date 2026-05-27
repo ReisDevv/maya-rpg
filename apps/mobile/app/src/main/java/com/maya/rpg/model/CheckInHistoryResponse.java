@@ -39,4 +39,8 @@ public class CheckInHistoryResponse {
  public String getNotes() { return notes; }
  public boolean isCompleted() { return isCompleted; }
  public String getExecutedAt() { return executedAt; }
+
+ public void setPainLevel(int painLevel) { this.painLevel = painLevel; }
+ public void setFeelingLevel(int feelingLevel) { this.feelingLevel = feelingLevel; }
+ public void setExecutedAt(String executedAt) { this.executedAt = executedAt; }
 }

@@ -1,6 +1,8 @@
 package com.maya.rpg;
 
 import android.app.Application;
+import android.content.SharedPreferences;
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.work.Constraints;
 import androidx.work.NetworkType;
 import androidx.work.PeriodicWorkRequest;
@@ -13,7 +15,12 @@ public class MayaApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        
+
+        // Restaura preferência de tema salva pelo usuário
+        SharedPreferences prefs = getSharedPreferences("maya_prefs", MODE_PRIVATE);
+        int nightMode = prefs.getInt("night_mode", AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
+        AppCompatDelegate.setDefaultNightMode(nightMode);
+
         // Inicializa o armazenamento seguro globalmente
         TokenManager.init(this);
 

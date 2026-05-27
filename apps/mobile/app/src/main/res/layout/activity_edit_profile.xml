@@ -63,16 +63,34 @@
                     android:layout_height="wrap_content"
                     android:padding="20dp">
 
-                    <com.google.android.material.imageview.ShapeableImageView
-                        android:id="@+id/ivProfileAvatar"
-                        android:layout_width="80dp"
-                        android:layout_height="80dp"
-                        android:scaleType="centerCrop"
-                        android:src="@drawable/ic_person"
+                    <FrameLayout
+                        android:id="@+id/frameAvatar"
+                        android:layout_width="88dp"
+                        android:layout_height="88dp"
+                        android:clickable="true"
+                        android:focusable="true"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:shapeAppearanceOverlay="@style/ShapeAppearance.Maya.RoundedCircle" />
+                        app:layout_constraintTop_toTopOf="parent">
+
+                        <com.google.android.material.imageview.ShapeableImageView
+                            android:id="@+id/ivProfileAvatar"
+                            android:layout_width="80dp"
+                            android:layout_height="80dp"
+                            android:scaleType="centerCrop"
+                            android:src="@drawable/ic_person"
+                            app:shapeAppearanceOverlay="@style/ShapeAppearance.Maya.RoundedCircle" />
+
+                        <ImageView
+                            android:id="@+id/ivEditPhoto"
+                            android:layout_width="26dp"
+                            android:layout_height="26dp"
+                            android:layout_gravity="bottom|end"
+                            android:background="@drawable/bg_button_teal"
+                            android:padding="5dp"
+                            android:src="@drawable/ic_settings_edit"
+                            app:tint="@color/white" />
+                    </FrameLayout>
 
                     <TextView
                         android:id="@+id/tvProfileName"
@@ -85,7 +103,7 @@
                         android:textStyle="bold"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@id/ivProfileAvatar" />
+                        app:layout_constraintTop_toBottomOf="@id/frameAvatar" />
 
                     <TextView
                         android:id="@+id/tvEmail"
@@ -247,7 +265,7 @@
                         android:layout_height="1dp"
                         android:background="#EEEEEE" />
 
-                    <!-- Row: Foto -->
+                    <!-- Row: Alterar Foto -->
                     <androidx.constraintlayout.widget.ConstraintLayout
                         android:id="@+id/rowEditPhoto"
                         android:layout_width="match_parent"
@@ -256,10 +274,10 @@
                         android:paddingHorizontal="16dp">
 
                         <ImageView
-                            android:id="@+id/ivIconDelete"
+                            android:id="@+id/ivIconPhoto"
                             android:layout_width="24dp"
                             android:layout_height="24dp"
-                            android:src="@drawable/ic_settings_delete"
+                            android:src="@drawable/ic_settings_edit"
                             app:layout_constraintBottom_toBottomOf="parent"
                             app:layout_constraintStart_toStartOf="parent"
                             app:layout_constraintTop_toTopOf="parent" />
@@ -268,11 +286,11 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginStart="16dp"
-                            android:text="Foto"
+                            android:text="Alterar foto de perfil"
                             android:textColor="@color/black"
                             android:textSize="16sp"
                             app:layout_constraintBottom_toBottomOf="parent"
-                            app:layout_constraintStart_toEndOf="@id/ivIconDelete"
+                            app:layout_constraintStart_toEndOf="@id/ivIconPhoto"
                             app:layout_constraintTop_toTopOf="parent" />
                     </androidx.constraintlayout.widget.ConstraintLayout>
                 </LinearLayout>
