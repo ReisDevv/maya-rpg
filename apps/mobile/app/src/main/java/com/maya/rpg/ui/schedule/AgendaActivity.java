@@ -131,8 +131,8 @@ public class AgendaActivity extends BaseAuthActivity {
 
         tvDate.setText(formatAppointmentDate(app.getDateTime()));
         
-        String status = app.getStatus() != null ? app.getStatus().toLowerCase() : "confirmed";
-        if (status.contains("done") || status.contains("realizado")) {
+        String status = app.getStatus() != null ? app.getStatus().toLowerCase() : "";
+        if (status.contains("done") || status.contains("completed") || status.contains("realizado")) {
             pill.setBackgroundResource(R.drawable.bg_pill_blue);
             tvStatus.setText("✓ Realizado");
             tvStatus.setTextColor(Color.parseColor("#4FC3F7"));
@@ -142,10 +142,16 @@ public class AgendaActivity extends BaseAuthActivity {
             tvStatus.setText("✕ Cancelado");
             tvStatus.setTextColor(Color.parseColor("#E57373"));
             tvPrice.setText("R$150");
-        } else {
+        } else if (status.contains("confirmed")) {
             pill.setBackgroundResource(R.drawable.bg_pill_green);
             tvStatus.setText("✓ Confirmado");
             tvStatus.setTextColor(Color.parseColor("#81C784"));
+            tvPrice.setText("R$250");
+        } else {
+            // PENDING ou status desconhecido — aguardando resposta do profissional
+            pill.setBackgroundResource(R.drawable.bg_pill_yellow);
+            tvStatus.setText("⏳ Aguardando");
+            tvStatus.setTextColor(Color.parseColor("#FFB300"));
             tvPrice.setText("R$250");
         }
 
