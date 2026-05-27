@@ -28,17 +28,16 @@ import com.maya.rpg.model.CheckInHistoryResponse;
 import com.maya.rpg.model.NotificationItem;
 import com.maya.rpg.model.PaginatedResponse;
 import android.widget.ProgressBar;
-import android.widget.Toast;
 import java.util.HashSet;
 import java.util.Set;
 import android.animation.ObjectAnimator;
 import android.view.animation.DecelerateInterpolator;
 import com.maya.rpg.ui.BaseAuthActivity;
+import com.maya.rpg.ui.notifications.NotificationsActivity;
 import java.text.SimpleDateFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -68,6 +67,9 @@ public class HomeActivity extends BaseAuthActivity {
         }
         loadNextAppointment();
         loadEvolutionData();
+
+        findViewById(R.id.notificationBell).setOnClickListener(v ->
+                startActivity(new Intent(this, NotificationsActivity.class)));
 
         // 3. Configura Navegação para EXERCÍCIOS
         View.OnClickListener openExercises = v ->
@@ -273,33 +275,24 @@ public class HomeActivity extends BaseAuthActivity {
     }
 
     private void checkUnreadNotifications() {
-        RetrofitClient.getApiService().getMyNotifications(5).enqueue(new Callback<PaginatedResponse<NotificationItem>>() {
+        RetrofitClient.getApiService().getMyNotifications(20).enqueue(new Callback<PaginatedResponse<NotificationItem>>() {
             @Override
             public void onResponse(Call<PaginatedResponse<NotificationItem>> call,
                                    Response<PaginatedResponse<NotificationItem>> response) {
                 if (isFinishing() || isDestroyed()) return;
                 if (!response.isSuccessful() || response.body() == null) return;
                 List<NotificationItem> all = response.body().getData();
-                if (all == null || all.isEmpty()) return;
+                if (all == null) return;
 
-                NotificationItem latest = null;
+                boolean hasUnread = false;
                 for (NotificationItem n : all) {
-                    if (!n.isRead()) { latest = n; break; }
+                    if (!n.isRead()) { hasUnread = true; break; }
                 }
-                if (latest == null) return;
 
-                String msg = latest.getTitle();
-                if (latest.getBody() != null && !latest.getBody().isEmpty()) {
-                    msg += "\n" + latest.getBody();
+                View badge = findViewById(R.id.notificationBadge);
+                if (badge != null) {
+                    badge.setVisibility(hasUnread ? View.VISIBLE : View.GONE);
                 }
-                Toast.makeText(HomeActivity.this, msg, Toast.LENGTH_LONG).show();
-
-                RetrofitClient.getApiService()
-                        .markAllNotificationsRead(Collections.emptyMap())
-                        .enqueue(new Callback<Void>() {
-                            @Override public void onResponse(Call<Void> c, Response<Void> r) {}
-                            @Override public void onFailure(Call<Void> c, Throwable t) {}
-                        });
             }
 
             @Override

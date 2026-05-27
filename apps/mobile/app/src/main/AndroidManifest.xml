@@ -44,6 +44,7 @@
         <activity android:name=".ui.chat.ChatListActivity" />
         <activity android:name=".ui.chat.ChatActivity" />
         <activity android:name=".ui.auth.LgpdConsentActivity" />
+        <activity android:name=".ui.notifications.NotificationsActivity" />
 
         <service
             android:name=".fcm.MayaFirebaseMessagingService"
