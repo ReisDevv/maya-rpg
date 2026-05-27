@@ -112,7 +112,20 @@ public class ExercisePlanActivity extends BaseAuthActivity {
             return;
         }
 
-        showLoading(true);
+        // Mostra cache imediatamente para resposta instantânea, API atualiza em background
+        Handler mainHandler = new Handler(Looper.getMainLooper());
+        OfflineManager.loadCachedPrescriptions(this, patientId, mainHandler, cached -> {
+            if (cached != null && !cached.isEmpty()) {
+                allPrescriptions = cached;
+                adapter.updateList(allPrescriptions);
+                rvPrescriptions.setVisibility(View.VISIBLE);
+                layoutEmpty.setVisibility(View.GONE);
+                skeletonLayout.clearAnimation();
+                skeletonLayout.setVisibility(View.GONE);
+            } else {
+                showLoading(true);
+            }
+        });
 
         RetrofitClient.getApiService()
                 .getMyFullPrescriptions()
@@ -120,13 +133,12 @@ public class ExercisePlanActivity extends BaseAuthActivity {
                     @Override
                     public void onResponse(Call<FullPrescriptionsResponse> call,
                                            Response<FullPrescriptionsResponse> response) {
-                        
                         showLoading(false);
+                        layoutOfflineBanner.setVisibility(View.GONE);
 
                         if (response.isSuccessful() && response.body() != null) {
                             allPrescriptions = response.body().getData();
-                            android.util.Log.d("MayaPlan", "Prescrições recebidas: " + (allPrescriptions != null ? allPrescriptions.size() : "null"));
-                            
+
                             if (allPrescriptions == null || allPrescriptions.isEmpty()) {
                                 showEmptyState();
                             } else {
@@ -135,74 +147,39 @@ public class ExercisePlanActivity extends BaseAuthActivity {
                                 adapter.updateList(allPrescriptions);
                                 rvPrescriptions.setVisibility(View.VISIBLE);
                             }
-                        } 
-                        else if (response.code() == 404) {
-                            android.util.Log.w("MayaPlan", "404: Nenhuma prescrição encontrada para o paciente logado");
-                            showEmptyState();
-                        }
-                        else if (response.code() == 401) {
-                            android.util.Log.e("MayaPlan", "401: Token inválido ou expirado. Redirecionando para login.");
+                        } else if (response.code() == 404) {
+                            if (allPrescriptions == null || allPrescriptions.isEmpty()) showEmptyState();
+                        } else if (response.code() == 401) {
                             TokenManager.clearAll();
                             startActivity(new Intent(ExercisePlanActivity.this,
                                     com.maya.rpg.ui.auth.LoginActivity.class));
                             finishAffinity();
-                        }
-                        else if (response.code() == 403) {
-                            android.util.Log.e("MayaPlan", "403: Acesso negado para GET /prescriptions/me/full");
-                            loadFromCache(patientId);
-                        }
-                        else {
-                            try {
-                                String errorBody = response.errorBody() != null ? response.errorBody().string() : "sem body";
-                                android.util.Log.e("MayaPlan", "Erro HTTP " + response.code() + ": " + errorBody);
-                            } catch (Exception e) {
-                                android.util.Log.e("MayaPlan", "Erro HTTP " + response.code() + " (body ilegível)");
-                            }
-                            loadFromCache(patientId);
+                        } else if (allPrescriptions == null || allPrescriptions.isEmpty()) {
+                            showEmptyState();
                         }
                     }
 
                     @Override
                     public void onFailure(Call<FullPrescriptionsResponse> call, Throwable t) {
                         showLoading(false);
-                        android.util.Log.e("MayaPlan", "Falha de rede ou parse JSON ao carregar prescrições. Causa: " + t.getClass().getSimpleName() + " - " + t.getMessage(), t);
-                        // Erro real de rede (SocketTimeout, NoRouteToHost) ou falha de desserialização
-                        loadFromCache(patientId);
+                        if (allPrescriptions == null || allPrescriptions.isEmpty()) {
+                            showEmptyState();
+                            Toast.makeText(ExercisePlanActivity.this,
+                                    "Sem conexão e sem cache local disponível.", Toast.LENGTH_LONG).show();
+                        } else {
+                            layoutOfflineBanner.setVisibility(View.VISIBLE);
+                        }
                     }
                 });
     }
 
-    private void loadFromCache(String patientId) {
-        Handler mainHandler = new Handler(Looper.getMainLooper());
-        OfflineManager.loadCachedPrescriptions(this, patientId, mainHandler, cached -> {
-            if (cached != null && !cached.isEmpty()) {
-                allPrescriptions = cached;
-                adapter.updateList(allPrescriptions);
-                layoutOfflineBanner.setVisibility(View.VISIBLE);
-                rvPrescriptions.setVisibility(View.VISIBLE);
-                layoutEmpty.setVisibility(View.GONE);
-            } else {
-                showEmptyState();
-                Toast.makeText(this,
-                        "Sem conexão e sem cache local disponível.", Toast.LENGTH_LONG).show();
-            }
-        });
-    }
-
     private void setupBottomNav() {
-        findViewById(R.id.navHome).setOnClickListener(v -> {
-            startActivity(new Intent(this, HomeActivity.class));
-            finish();
-        });
-        findViewById(R.id.navExercises).setOnClickListener(v -> {
-            // Already here
-        });
-        findViewById(R.id.navEvolution).setOnClickListener(v -> {
-            startActivity(new Intent(this, EvolutionActivity.class));
-        });
-        findViewById(R.id.navMore).setOnClickListener(v -> {
-            startActivity(new Intent(this, ProfileActivity.class));
-        });
+        findViewById(R.id.navExercises).setAlpha(1.0f);
+        findViewById(R.id.navHome).setOnClickListener(v -> { startActivity(new Intent(this, HomeActivity.class)); finish(); });
+        findViewById(R.id.navExercises).setOnClickListener(v -> {});
+        findViewById(R.id.navSchedule).setOnClickListener(v -> startActivity(new Intent(this, com.maya.rpg.ui.schedule.ScheduleActivity.class)));
+        findViewById(R.id.navEvolution).setOnClickListener(v -> startActivity(new Intent(this, EvolutionActivity.class)));
+        findViewById(R.id.navMore).setOnClickListener(v -> startActivity(new Intent(this, ProfileActivity.class)));
     }
 
     private void filterPrescriptions(String query) {

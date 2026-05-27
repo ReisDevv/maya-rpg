@@ -21,17 +21,19 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:gravity="center"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:padding="6dp">
             <ImageView
-                android:layout_width="32dp"
-                android:layout_height="32dp"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
                 android:src="@drawable/ic_face_1" />
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
                 android:text="Muita Dor"
                 android:textColor="@color/maya_brown"
-                android:textSize="9sp" />
+                android:textSize="10sp" />
         </LinearLayout>
 
         <!-- Option 2 -->
@@ -41,17 +43,19 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:gravity="center"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:padding="6dp">
             <ImageView
-                android:layout_width="32dp"
-                android:layout_height="32dp"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
                 android:src="@drawable/ic_face_2" />
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Incomodo"
+                android:layout_marginTop="4dp"
+                android:text="Incômodo"
                 android:textColor="@color/maya_brown"
-                android:textSize="9sp" />
+                android:textSize="10sp" />
         </LinearLayout>
 
         <!-- Option 3 -->
@@ -61,17 +65,19 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:gravity="center"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:padding="6dp">
             <ImageView
-                android:layout_width="32dp"
-                android:layout_height="32dp"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
                 android:src="@drawable/ic_face_3" />
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
                 android:text="Neutro"
                 android:textColor="@color/maya_brown"
-                android:textSize="9sp" />
+                android:textSize="10sp" />
         </LinearLayout>
 
         <!-- Option 4 -->
@@ -81,17 +87,19 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:gravity="center"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:padding="6dp">
             <ImageView
-                android:layout_width="32dp"
-                android:layout_height="32dp"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
                 android:src="@drawable/ic_face_4" />
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
                 android:text="Bem"
                 android:textColor="@color/maya_brown"
-                android:textSize="9sp" />
+                android:textSize="10sp" />
         </LinearLayout>
 
         <!-- Option 5 -->
@@ -101,17 +109,19 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:gravity="center"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:padding="6dp">
             <ImageView
-                android:layout_width="32dp"
-                android:layout_height="32dp"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
                 android:src="@drawable/ic_face_5" />
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
                 android:text="Muito Bem"
                 android:textColor="@color/maya_brown"
-                android:textSize="9sp" />
+                android:textSize="10sp" />
         </LinearLayout>
 
     </LinearLayout>

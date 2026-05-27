@@ -354,14 +354,10 @@ public class EvolutionActivity extends BaseAuthActivity {
     }
 
     private void setupBottomNav() {
-        findViewById(R.id.navHome).setOnClickListener(v -> {
-            startActivity(new Intent(this, HomeActivity.class));
-            finish();
-        });
-        findViewById(R.id.navExercises).setOnClickListener(v -> {
-            startActivity(new Intent(this, com.maya.rpg.ui.exercises.ExercisePlanActivity.class));
-            finish();
-        });
+        findViewById(R.id.navEvolution).setAlpha(1.0f);
+        findViewById(R.id.navHome).setOnClickListener(v -> { startActivity(new Intent(this, HomeActivity.class)); finish(); });
+        findViewById(R.id.navExercises).setOnClickListener(v -> { startActivity(new Intent(this, com.maya.rpg.ui.exercises.ExercisePlanActivity.class)); finish(); });
+        findViewById(R.id.navSchedule).setOnClickListener(v -> startActivity(new Intent(this, com.maya.rpg.ui.schedule.ScheduleActivity.class)));
         findViewById(R.id.navEvolution).setOnClickListener(v -> {});
         findViewById(R.id.navMore).setOnClickListener(v -> startActivity(new Intent(this, ProfileActivity.class)));
     }

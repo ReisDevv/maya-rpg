@@ -16,8 +16,9 @@
         android:background="?attr/selectableItemBackgroundBorderless"
         android:stateListAnimator="@animator/nav_icon_scale"
         android:contentDescription="@string/content_desc_nav_home"
-        android:padding="24dp"
+        android:padding="22dp"
         android:src="@drawable/vector_home"
+        android:alpha="0.5"
         app:layout_constraintEnd_toStartOf="@id/navExercises"
         app:layout_constraintStart_toStartOf="parent"
         app:tint="@color/white" />
@@ -31,10 +32,27 @@
         android:background="?attr/selectableItemBackgroundBorderless"
         android:stateListAnimator="@animator/nav_icon_scale"
         android:contentDescription="@string/content_desc_nav_exercises"
-        android:padding="20dp"
+        android:padding="18dp"
         android:src="@drawable/vector_exercises"
-        app:layout_constraintEnd_toStartOf="@id/navEvolution"
+        android:alpha="0.5"
+        app:layout_constraintEnd_toStartOf="@id/navSchedule"
         app:layout_constraintStart_toEndOf="@id/navHome"
+        app:tint="@color/white" />
+
+    <ImageView
+        android:id="@+id/navSchedule"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:clickable="true"
+        android:focusable="true"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:stateListAnimator="@animator/nav_icon_scale"
+        android:contentDescription="Agendar sessão"
+        android:padding="22dp"
+        android:src="@drawable/ic_nav_calendar"
+        android:alpha="0.5"
+        app:layout_constraintEnd_toStartOf="@id/navEvolution"
+        app:layout_constraintStart_toEndOf="@id/navExercises"
         app:tint="@color/white" />
 
     <ImageView
@@ -46,10 +64,11 @@
         android:background="?attr/selectableItemBackgroundBorderless"
         android:stateListAnimator="@animator/nav_icon_scale"
         android:contentDescription="@string/content_desc_nav_evolution"
-        android:padding="24dp"
+        android:padding="22dp"
         android:src="@drawable/arquivo_grafico_linha_1"
+        android:alpha="0.5"
         app:layout_constraintEnd_toStartOf="@id/navMore"
-        app:layout_constraintStart_toEndOf="@id/navExercises"
+        app:layout_constraintStart_toEndOf="@id/navSchedule"
         app:tint="@color/white" />
 
     <ImageView
@@ -61,8 +80,9 @@
         android:background="?attr/selectableItemBackgroundBorderless"
         android:stateListAnimator="@animator/nav_icon_scale"
         android:contentDescription="@string/content_desc_nav_more"
-        android:padding="24dp"
+        android:padding="22dp"
         android:src="@drawable/aplicativos_2"
+        android:alpha="0.5"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/navEvolution"
         app:tint="@color/white" />

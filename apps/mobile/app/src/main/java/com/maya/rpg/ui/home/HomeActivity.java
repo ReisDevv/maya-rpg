@@ -96,13 +96,10 @@ public class HomeActivity extends BaseAuthActivity {
         );
 
         // Home nav apenas scrolla para o topo ou não faz nada
-        findViewById(R.id.navHome).setOnClickListener(v -> {
-            // Já estamos na Home
-        });
-
-        findViewById(R.id.navMore).setOnClickListener(v -> {
-            startActivity(new Intent(this, ProfileActivity.class));
-        });
+        findViewById(R.id.navHome).setAlpha(1.0f);
+        findViewById(R.id.navHome).setOnClickListener(v -> {});
+        findViewById(R.id.navSchedule).setOnClickListener(v -> startActivity(new Intent(this, ScheduleActivity.class)));
+        findViewById(R.id.navMore).setOnClickListener(v -> startActivity(new Intent(this, ProfileActivity.class)));
 
         findViewById(R.id.cardSchedule).setOnClickListener(v ->
                 startActivity(new Intent(this, ScheduleActivity.class)));
