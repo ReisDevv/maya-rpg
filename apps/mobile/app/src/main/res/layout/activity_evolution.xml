@@ -1,20 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white">
+    android:background="@color/maya_bg_bege">
 
-    <!-- Subtle Back Arrow -->
     <ImageView
         android:id="@+id/btnBack"
         android:layout_width="40dp"
         android:layout_height="40dp"
         android:layout_marginStart="24dp"
         android:layout_marginTop="32dp"
-        android:background="?attr/selectableItemBackgroundBorderless"
-        android:padding="8dp"
+        android:background="@drawable/bg_notification_circle"
+        android:padding="10dp"
         android:src="@drawable/ic_arrow_back"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
@@ -40,158 +38,355 @@
         app:layout_constraintBottom_toTopOf="@id/bottomNavContainer"
         app:layout_constraintTop_toBottomOf="@id/tvTitle">
 
-        <androidx.constraintlayout.widget.ConstraintLayout
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingHorizontal="20dp"
+            android:paddingTop="20dp"
             android:paddingBottom="32dp">
 
-            <!-- Chart Card -->
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/cardChartContainer"
+            <!-- ─── Cards de estatísticas 2x2 ─── -->
+            <GridLayout
+                android:id="@+id/gridStats"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="24dp"
-                android:layout_marginTop="24dp"
-                app:cardBackgroundColor="@color/maya_bg_soft"
-                app:cardCornerRadius="25dp"
-                app:cardElevation="4dp"
-                app:layout_constraintTop_toTopOf="parent">
+                android:columnCount="2"
+                android:rowCount="2"
+                android:useDefaultMargins="false">
 
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:layout_width="match_parent"
+                <!-- Card: Dor Média -->
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/cardPainAvg"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:padding="16dp">
+                    android:layout_columnWeight="1"
+                    android:layout_margin="4dp"
+                    app:cardBackgroundColor="@color/white"
+                    app:cardCornerRadius="16dp"
+                    app:cardElevation="2dp">
 
-                    <!-- Tab Row -->
                     <LinearLayout
-                        android:id="@+id/layoutTabs"
                         android:layout_width="match_parent"
-                        android:layout_height="40dp"
-                        android:orientation="horizontal"
-                        app:layout_constraintTop_toTopOf="parent">
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="16dp">
 
                         <TextView
-                            android:id="@+id/tabPain"
-                            android:layout_width="0dp"
-                            android:layout_height="match_parent"
-                            android:layout_weight="1"
-                            android:background="@drawable/bg_tab_selected"
-                            android:gravity="center"
-                            android:drawablePadding="2dp"
-                            app:drawableStartCompat="@drawable/ic_evolution_pain_new"
-                            android:text="Nível de Dor"
-                            android:textColor="@color/white"
-                            android:textSize="10sp"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Dor Média"
+                            android:textColor="#888888"
+                            android:textSize="12sp" />
+
+                        <TextView
+                            android:id="@+id/tvPainAvg"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:text="–"
+                            android:textColor="@color/black"
+                            android:textSize="28sp"
                             android:textStyle="bold" />
 
                         <TextView
-                            android:id="@+id/tabImprovement"
-                            android:layout_width="0dp"
-                            android:layout_height="match_parent"
-                            android:layout_weight="1"
-                            android:gravity="center"
-                            android:drawablePadding="2dp"
-                            app:drawableStartCompat="@drawable/ic_evolution_improvement"
-                            android:text="Melhora"
-                            android:textColor="@color/maya_dark_teal"
-                            android:textSize="10sp" />
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="de 0 a 10"
+                            android:textColor="#AAAAAA"
+                            android:textSize="11sp" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- Card: Tendência -->
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/cardTrend"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_margin="4dp"
+                    app:cardBackgroundColor="@color/white"
+                    app:cardCornerRadius="16dp"
+                    app:cardElevation="2dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="16dp">
 
                         <TextView
-                            android:id="@+id/tabFrequency"
-                            android:layout_width="0dp"
-                            android:layout_height="match_parent"
-                            android:layout_weight="1"
-                            android:gravity="center"
-                            android:drawablePadding="2dp"
-                            app:drawableStartCompat="@drawable/ic_evolution_frequency"
-                            android:text="Frequência"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Tendência de Dor"
+                            android:textColor="#888888"
+                            android:textSize="12sp" />
+
+                        <TextView
+                            android:id="@+id/tvTrend"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:text="–"
+                            android:textColor="@color/black"
+                            android:textSize="28sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/tvTrendLabel"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="sem dados"
+                            android:textColor="#AAAAAA"
+                            android:textSize="11sp" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- Card: Bem-estar -->
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/cardFeeling"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_margin="4dp"
+                    app:cardBackgroundColor="@color/white"
+                    app:cardCornerRadius="16dp"
+                    app:cardElevation="2dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="16dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Bem-estar"
+                            android:textColor="#888888"
+                            android:textSize="12sp" />
+
+                        <TextView
+                            android:id="@+id/tvFeelingAvg"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:text="–"
+                            android:textColor="@color/black"
+                            android:textSize="28sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="de 1 a 5"
+                            android:textColor="#AAAAAA"
+                            android:textSize="11sp" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- Card: Sessões -->
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/cardSessions"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_margin="4dp"
+                    app:cardBackgroundColor="@color/white"
+                    app:cardCornerRadius="16dp"
+                    app:cardElevation="2dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="16dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Total de Sessões"
+                            android:textColor="#888888"
+                            android:textSize="12sp" />
+
+                        <TextView
+                            android:id="@+id/tvTotalSessions"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:text="0"
                             android:textColor="@color/maya_dark_teal"
+                            android:textSize="28sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/tvSessionsLabel"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="check-ins"
+                            android:textColor="#AAAAAA"
+                            android:textSize="11sp" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+            </GridLayout>
+
+            <!-- ─── Heatmap de atividade (últimas 10 semanas) ─── -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                app:cardBackgroundColor="@color/white"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="2dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Frequência de Treinos"
+                            android:textColor="@color/black"
+                            android:textSize="15sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/tvHeatmapStreak"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text=""
+                            android:textColor="@color/maya_dark_teal"
+                            android:textSize="12sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+
+                    <!-- Cabeçalho dos dias -->
+                    <LinearLayout
+                        android:id="@+id/layoutHeatmapHeader"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:orientation="horizontal">
+
+                        <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                            android:layout_weight="1" android:gravity="center"
+                            android:text="S" android:textColor="#999" android:textSize="10sp"/>
+                        <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                            android:layout_weight="1" android:gravity="center"
+                            android:text="T" android:textColor="#999" android:textSize="10sp"/>
+                        <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                            android:layout_weight="1" android:gravity="center"
+                            android:text="Q" android:textColor="#999" android:textSize="10sp"/>
+                        <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                            android:layout_weight="1" android:gravity="center"
+                            android:text="Q" android:textColor="#999" android:textSize="10sp"/>
+                        <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                            android:layout_weight="1" android:gravity="center"
+                            android:text="S" android:textColor="#999" android:textSize="10sp"/>
+                        <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                            android:layout_weight="1" android:gravity="center"
+                            android:text="S" android:textColor="#999" android:textSize="10sp"/>
+                        <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                            android:layout_weight="1" android:gravity="center"
+                            android:text="D" android:textColor="#999" android:textSize="10sp"/>
+                    </LinearLayout>
+
+                    <!-- Grid do heatmap (preenchido via Java) -->
+                    <LinearLayout
+                        android:id="@+id/layoutHeatmap"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="6dp"
+                        android:orientation="vertical" />
+
+                    <!-- Legenda -->
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="end"
+                        android:layout_marginTop="8dp"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Menos"
+                            android:textColor="#AAAAAA"
+                            android:textSize="10sp" />
+
+                        <View android:layout_width="12dp" android:layout_height="12dp"
+                            android:layout_marginStart="4dp" android:background="@drawable/bg_heatmap_0" />
+                        <View android:layout_width="12dp" android:layout_height="12dp"
+                            android:layout_marginStart="3dp" android:background="@drawable/bg_heatmap_1" />
+                        <View android:layout_width="12dp" android:layout_height="12dp"
+                            android:layout_marginStart="3dp" android:background="@drawable/bg_heatmap_2" />
+                        <View android:layout_width="12dp" android:layout_height="12dp"
+                            android:layout_marginStart="3dp" android:background="@drawable/bg_heatmap_3" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="4dp"
+                            android:text="Mais"
+                            android:textColor="#AAAAAA"
                             android:textSize="10sp" />
                     </LinearLayout>
 
-                    <!-- Chart Area -->
-                    <com.github.mikephil.charting.charts.LineChart
-                        android:id="@+id/chartEvolution"
-                        android:layout_width="match_parent"
-                        android:layout_height="200dp"
-                        android:layout_marginTop="16dp"
-                        android:background="@drawable/bg_card_white"
-                        android:padding="8dp"
-                        app:layout_constraintTop_toBottomOf="@id/layoutTabs" />
-
-                    <com.github.mikephil.charting.charts.BarChart
-                        android:id="@+id/chartFrequency"
-                        android:layout_width="match_parent"
-                        android:layout_height="200dp"
-                        android:layout_marginTop="16dp"
-                        android:background="@drawable/bg_card_white"
-                        android:padding="8dp"
-                        android:visibility="gone"
-                        app:layout_constraintTop_toBottomOf="@id/layoutTabs" />
-
-                    <!-- Month/Day Labels (will be updated dynamically or part of chart) -->
-                    <TextView
-                        android:id="@+id/tvChartLabels"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:gravity="center"
-                        android:text="JAN  FEV  MAR  ABR  MAI  JUN  JUL  AGO  SET  OUT  NOV  DEZ"
-                        android:textColor="#757575"
-                        android:textSize="10sp"
-                        app:layout_constraintTop_toBottomOf="@id/chartEvolution" />
-
-                </androidx.constraintlayout.widget.ConstraintLayout>
+                </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Specialist Reports Section -->
+            <!-- ─── Laudos do Especialista ─── -->
             <TextView
                 android:id="@+id/tvReportsLabel"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="24dp"
-                android:layout_marginTop="32dp"
-                android:text="Laudos Do Especialista"
+                android:layout_marginTop="24dp"
+                android:text="Laudos do Especialista"
                 android:textColor="@color/black"
-                android:textSize="20sp"
+                android:textSize="18sp"
                 android:textStyle="bold"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/cardChartContainer" />
+                android:visibility="gone" />
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rvReports"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="12dp"
                 android:clipToPadding="false"
                 android:orientation="horizontal"
-                android:paddingHorizontal="24dp"
-                app:layout_constraintTop_toBottomOf="@id/tvReportsLabel" />
+                android:paddingHorizontal="0dp"
+                android:visibility="gone" />
 
-            <!-- Achievements Section -->
+            <!-- ─── Conquistas ─── -->
             <TextView
                 android:id="@+id/tvAchievementsLabel"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="24dp"
-                android:layout_marginTop="32dp"
+                android:layout_marginTop="24dp"
                 android:text="Suas Conquistas"
                 android:textColor="@color/black"
-                android:textSize="20sp"
-                android:textStyle="bold"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/rvReports" />
+                android:textSize="18sp"
+                android:textStyle="bold" />
 
             <LinearLayout
                 android:id="@+id/layoutAchievements"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:orientation="vertical"
-                android:paddingHorizontal="24dp"
-                app:layout_constraintTop_toBottomOf="@id/tvAchievementsLabel" />
+                android:layout_marginTop="12dp"
+                android:orientation="vertical" />
 
-        </androidx.constraintlayout.widget.ConstraintLayout>
+        </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
     <include

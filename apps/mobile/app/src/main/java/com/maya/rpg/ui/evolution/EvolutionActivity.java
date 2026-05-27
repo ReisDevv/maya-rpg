@@ -9,22 +9,9 @@ import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import androidx.core.content.ContextCompat;
-import androidx.core.widget.TextViewCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.github.mikephil.charting.charts.BarChart;
-import com.github.mikephil.charting.charts.LineChart;
-import com.github.mikephil.charting.components.XAxis;
-import com.github.mikephil.charting.components.YAxis;
-import com.github.mikephil.charting.data.BarData;
-import com.github.mikephil.charting.data.BarDataSet;
-import com.github.mikephil.charting.data.BarEntry;
-import com.github.mikephil.charting.data.Entry;
-import com.github.mikephil.charting.data.LineData;
-import com.github.mikephil.charting.data.LineDataSet;
-import com.github.mikephil.charting.formatter.ValueFormatter;
 import com.maya.rpg.R;
 import com.maya.rpg.api.RetrofitClient;
 import com.maya.rpg.model.CheckInHistoryResponse;
@@ -34,28 +21,27 @@ import com.maya.rpg.ui.BaseAuthActivity;
 import com.maya.rpg.ui.home.HomeActivity;
 import com.maya.rpg.ui.profile.ProfileActivity;
 
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.TreeMap;
+import java.util.Set;
 
-import android.content.res.ColorStateList;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
 public class EvolutionActivity extends BaseAuthActivity {
 
-    private LineChart chartEvolution;
-    private BarChart chartFrequency;
-    private TextView tabPain, tabImprovement, tabFrequency;
+    private TextView tvPainAvg, tvTrend, tvTrendLabel, tvFeelingAvg;
+    private TextView tvTotalSessions, tvSessionsLabel, tvHeatmapStreak;
+    private LinearLayout layoutHeatmap, layoutAchievements;
     private RecyclerView rvReports;
-    private LinearLayout layoutAchievements;
     private TextView tvReportsLabel;
     private List<CheckInHistoryResponse> checkInHistory = new ArrayList<>();
 
@@ -64,30 +50,21 @@ public class EvolutionActivity extends BaseAuthActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_evolution);
 
-        chartEvolution = findViewById(R.id.chartEvolution);
-        chartFrequency = findViewById(R.id.chartFrequency);
-        chartEvolution.setNoDataText("Carregando dados...");
-        chartFrequency.setNoDataText("Carregando dados...");
-        tabPain = findViewById(R.id.tabPain);
-        tabImprovement = findViewById(R.id.tabImprovement);
-        tabFrequency = findViewById(R.id.tabFrequency);
-        rvReports = findViewById(R.id.rvReports);
+        tvPainAvg = findViewById(R.id.tvPainAvg);
+        tvTrend = findViewById(R.id.tvTrend);
+        tvTrendLabel = findViewById(R.id.tvTrendLabel);
+        tvFeelingAvg = findViewById(R.id.tvFeelingAvg);
+        tvTotalSessions = findViewById(R.id.tvTotalSessions);
+        tvSessionsLabel = findViewById(R.id.tvSessionsLabel);
+        tvHeatmapStreak = findViewById(R.id.tvHeatmapStreak);
+        layoutHeatmap = findViewById(R.id.layoutHeatmap);
         layoutAchievements = findViewById(R.id.layoutAchievements);
+        rvReports = findViewById(R.id.rvReports);
         tvReportsLabel = findViewById(R.id.tvReportsLabel);
 
         findViewById(R.id.btnBack).setOnClickListener(v -> finish());
 
-        setupTabs();
         setupBottomNav();
-        // Ativa tab "Dor" como padrão visualmente
-        resetTabs();
-        tabPain.setBackgroundResource(R.drawable.bg_tab_selected);
-        tabPain.setTextColor(Color.WHITE);
-        tabPain.setTypeface(null, android.graphics.Typeface.BOLD);
-        android.content.res.ColorStateList white = android.content.res.ColorStateList.valueOf(Color.WHITE);
-        androidx.core.widget.TextViewCompat.setCompoundDrawableTintList(tabPain, white);
-        chartFrequency.setVisibility(View.GONE);
-        chartEvolution.setVisibility(View.VISIBLE);
         loadHistory();
         loadMedicalRecords();
     }
@@ -105,14 +82,16 @@ public class EvolutionActivity extends BaseAuthActivity {
                 } else {
                     checkInHistory = new ArrayList<>();
                 }
-                showPainChart();
+                renderStats();
+                renderHeatmap();
                 renderAchievements();
             }
 
             @Override
             public void onFailure(Call<PaginatedResponse<CheckInHistoryResponse>> call, Throwable t) {
                 checkInHistory = new ArrayList<>();
-                showPainChart();
+                renderStats();
+                renderHeatmap();
                 renderAchievements();
             }
         });
@@ -125,8 +104,7 @@ public class EvolutionActivity extends BaseAuthActivity {
                     public void onResponse(Call<PaginatedResponse<MedicalRecord>> call,
                                            Response<PaginatedResponse<MedicalRecord>> response) {
                         if (response.isSuccessful() && response.body() != null) {
-                            List<MedicalRecord> records = response.body().getData();
-                            renderMedicalRecords(records);
+                            renderMedicalRecords(response.body().getData());
                         } else {
                             tvReportsLabel.setVisibility(View.GONE);
                             rvReports.setVisibility(View.GONE);
@@ -139,6 +117,163 @@ public class EvolutionActivity extends BaseAuthActivity {
                         rvReports.setVisibility(View.GONE);
                     }
                 });
+    }
+
+    // ─── CARDS DE ESTATÍSTICAS ────────────────────────────────────────────────
+
+    private void renderStats() {
+        if (checkInHistory.isEmpty()) {
+            tvPainAvg.setText("–");
+            tvTrend.setText("–");
+            tvTrendLabel.setText("sem dados ainda");
+            tvFeelingAvg.setText("–");
+            tvTotalSessions.setText("0");
+            tvSessionsLabel.setText("complete a primeira sessão!");
+            return;
+        }
+
+        // Dor média geral
+        double painSum = 0;
+        int painCount = 0;
+        for (CheckInHistoryResponse c : checkInHistory) {
+            painSum += c.getPainLevel();
+            painCount++;
+        }
+        double painAvg = painSum / painCount;
+        tvPainAvg.setText(String.format(Locale.US, "%.1f", painAvg / 10.0 * 10)); // 0-10
+        // Cor da dor: verde se <= 4, amarelo se <= 7, vermelho se > 7
+        int painColor = painAvg <= 40 ? Color.parseColor("#2E7D32")
+                : painAvg <= 70 ? Color.parseColor("#F57C00")
+                : Color.parseColor("#C62828");
+        tvPainAvg.setTextColor(painColor);
+
+        // Tendência: compara primeira metade vs segunda metade
+        int half = checkInHistory.size() / 2;
+        if (half > 0) {
+            // Lista vem mais recente primeiro (desc) — segunda metade = mais antigo
+            List<CheckInHistoryResponse> recent = checkInHistory.subList(0, half);
+            List<CheckInHistoryResponse> older = checkInHistory.subList(half, checkInHistory.size());
+            double recentPain = 0, olderPain = 0;
+            for (CheckInHistoryResponse c : recent) recentPain += c.getPainLevel();
+            for (CheckInHistoryResponse c : older) olderPain += c.getPainLevel();
+            recentPain /= recent.size();
+            olderPain /= older.size();
+            double diff = olderPain - recentPain; // positivo = melhorou (dor caiu)
+            int pct = (int) Math.abs(diff / Math.max(olderPain, 1) * 100);
+            if (diff > 5) {
+                tvTrend.setText("↓ " + pct + "%");
+                tvTrend.setTextColor(Color.parseColor("#2E7D32"));
+                tvTrendLabel.setText("dor reduzindo ✓");
+                tvTrendLabel.setTextColor(Color.parseColor("#2E7D32"));
+            } else if (diff < -5) {
+                tvTrend.setText("↑ " + pct + "%");
+                tvTrend.setTextColor(Color.parseColor("#C62828"));
+                tvTrendLabel.setText("dor aumentando");
+                tvTrendLabel.setTextColor(Color.parseColor("#C62828"));
+            } else {
+                tvTrend.setText("→");
+                tvTrend.setTextColor(Color.parseColor("#F57C00"));
+                tvTrendLabel.setText("estável");
+                tvTrendLabel.setTextColor(Color.GRAY);
+            }
+        } else {
+            tvTrend.setText("–");
+            tvTrendLabel.setText("poucas sessões");
+        }
+
+        // Feeling médio
+        double feelSum = 0;
+        int feelCount = 0;
+        for (CheckInHistoryResponse c : checkInHistory) {
+            if (c.getFeelingLevel() > 0) { feelSum += c.getFeelingLevel(); feelCount++; }
+        }
+        if (feelCount > 0) {
+            double feelAvg = feelSum / feelCount;
+            tvFeelingAvg.setText(String.format(Locale.US, "%.1f", feelAvg));
+            int feelColor = feelAvg >= 4 ? Color.parseColor("#2E7D32")
+                    : feelAvg >= 3 ? Color.parseColor("#F57C00")
+                    : Color.parseColor("#C62828");
+            tvFeelingAvg.setTextColor(feelColor);
+        } else {
+            tvFeelingAvg.setText("–");
+        }
+
+        // Total de sessões
+        tvTotalSessions.setText(String.valueOf(checkInHistory.size()));
+        int weeks = calcWeekStreak();
+        tvSessionsLabel.setText(weeks > 0 ? "🔥 " + weeks + " dias esta semana" : "check-ins registrados");
+    }
+
+    // ─── HEATMAP ──────────────────────────────────────────────────────────────
+
+    private void renderHeatmap() {
+        layoutHeatmap.removeAllViews();
+
+        // Monta mapa de datas com contagem de check-ins
+        Map<String, Integer> countByDate = new HashMap<>();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
+        for (CheckInHistoryResponse c : checkInHistory) {
+            if (c.getExecutedAt() == null || c.getExecutedAt().length() < 10) continue;
+            String date = c.getExecutedAt().substring(0, 10);
+            countByDate.merge(date, 1, Integer::sum);
+        }
+
+        // Últimas 10 semanas — de segunda a domingo
+        Calendar cal = Calendar.getInstance();
+        cal.setFirstDayOfWeek(Calendar.MONDAY);
+        cal.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
+        cal.add(Calendar.WEEK_OF_YEAR, -9); // 10 semanas atrás (inclui a atual)
+        cal.set(Calendar.HOUR_OF_DAY, 0);
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MILLISECOND, 0);
+
+        String today = sdf.format(Calendar.getInstance().getTime());
+
+        int cellSizeDp = dp(20);
+        int gapDp = dp(3);
+
+        for (int week = 0; week < 10; week++) {
+            LinearLayout row = new LinearLayout(this);
+            row.setOrientation(LinearLayout.HORIZONTAL);
+            LinearLayout.LayoutParams rowParams = new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            rowParams.setMargins(0, 0, 0, gapDp);
+            row.setLayoutParams(rowParams);
+
+            for (int day = 0; day < 7; day++) {
+                String dateStr = sdf.format(cal.getTime());
+                int count = countByDate.getOrDefault(dateStr, 0);
+                boolean isFuture = dateStr.compareTo(today) > 0;
+
+                View cell = new View(this);
+                LinearLayout.LayoutParams cellParams = new LinearLayout.LayoutParams(0, cellSizeDp, 1f);
+                cellParams.setMargins(gapDp / 2, 0, gapDp / 2, 0);
+                cell.setLayoutParams(cellParams);
+
+                if (isFuture) {
+                    cell.setBackgroundResource(R.drawable.bg_heatmap_0);
+                    cell.setAlpha(0.3f);
+                } else if (count == 0) {
+                    cell.setBackgroundResource(R.drawable.bg_heatmap_0);
+                } else if (count == 1) {
+                    cell.setBackgroundResource(R.drawable.bg_heatmap_1);
+                } else if (count <= 3) {
+                    cell.setBackgroundResource(R.drawable.bg_heatmap_2);
+                } else {
+                    cell.setBackgroundResource(R.drawable.bg_heatmap_3);
+                }
+
+                row.addView(cell);
+                cal.add(Calendar.DAY_OF_MONTH, 1);
+            }
+
+            layoutHeatmap.addView(row);
+        }
+
+        // Streak no canto superior direito
+        int streak = calcWeekStreak();
+        tvHeatmapStreak.setText(streak > 0 ? "🔥 " + streak + " dias esta semana" : "");
     }
 
     // ─── LAUDOS ──────────────────────────────────────────────────────────────
@@ -214,7 +349,6 @@ public class EvolutionActivity extends BaseAuthActivity {
         rowParams.setMargins(0, 0, 0, dp(8));
         row.setLayoutParams(rowParams);
 
-        // Ícone (emoji)
         TextView icon = new TextView(this);
         icon.setText(a.icon);
         icon.setTextSize(28);
@@ -223,7 +357,6 @@ public class EvolutionActivity extends BaseAuthActivity {
         icon.setLayoutParams(iconParams);
         icon.setGravity(Gravity.CENTER);
 
-        // Textos
         LinearLayout texts = new LinearLayout(this);
         texts.setOrientation(LinearLayout.VERTICAL);
         LinearLayout.LayoutParams textsParams = new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f);
@@ -244,7 +377,6 @@ public class EvolutionActivity extends BaseAuthActivity {
         texts.addView(title);
         texts.addView(desc);
 
-        // Badge de desbloqueado
         TextView badge = new TextView(this);
         badge.setText(a.unlocked ? "✓" : "🔒");
         badge.setTextSize(16);
@@ -256,6 +388,8 @@ public class EvolutionActivity extends BaseAuthActivity {
         return row;
     }
 
+    // ─── HELPERS ──────────────────────────────────────────────────────────────
+
     private int calcWeekStreak() {
         if (checkInHistory == null || checkInHistory.isEmpty()) return 0;
         Calendar startOfWeek = Calendar.getInstance();
@@ -266,7 +400,7 @@ public class EvolutionActivity extends BaseAuthActivity {
         startOfWeek.set(Calendar.SECOND, 0);
         startOfWeek.set(Calendar.MILLISECOND, 0);
 
-        java.util.Set<String> days = new java.util.HashSet<>();
+        Set<String> days = new HashSet<>();
         for (CheckInHistoryResponse c : checkInHistory) {
             if (c.getExecutedAt() == null) continue;
             try {
@@ -280,7 +414,7 @@ public class EvolutionActivity extends BaseAuthActivity {
 
     private int calcUniqueDays() {
         if (checkInHistory == null) return 0;
-        java.util.Set<String> days = new java.util.HashSet<>();
+        Set<String> days = new HashSet<>();
         for (CheckInHistoryResponse c : checkInHistory) {
             if (c.getExecutedAt() != null && c.getExecutedAt().length() >= 10)
                 days.add(c.getExecutedAt().substring(0, 10));
@@ -288,221 +422,8 @@ public class EvolutionActivity extends BaseAuthActivity {
         return days.size();
     }
 
-    // ─── GRÁFICOS ────────────────────────────────────────────────────────────
-
-    private void setupTabs() {
-        View.OnClickListener listener = v -> {
-            resetTabs();
-            TextView tv = (TextView) v;
-            tv.setBackgroundResource(R.drawable.bg_tab_selected);
-            tv.setTextColor(Color.WHITE);
-            tv.setTypeface(null, Typeface.BOLD);
-            TextViewCompat.setCompoundDrawableTintList(tv, ColorStateList.valueOf(Color.WHITE));
-            if (v.getId() == R.id.tabPain) showPainChart();
-            else if (v.getId() == R.id.tabImprovement) showImprovementChart();
-            else showFrequencyChart();
-        };
-        tabPain.setOnClickListener(listener);
-        tabImprovement.setOnClickListener(listener);
-        tabFrequency.setOnClickListener(listener);
-    }
-
-    private void resetTabs() {
-        int teal = ContextCompat.getColor(this, R.color.maya_dark_teal);
-        for (TextView t : new TextView[]{tabPain, tabImprovement, tabFrequency}) {
-            t.setBackgroundResource(R.drawable.bg_tab_unselected);
-            t.setTextColor(teal);
-            t.setTypeface(null, Typeface.NORMAL);
-            TextViewCompat.setCompoundDrawableTintList(t, ColorStateList.valueOf(teal));
-        }
-    }
-
-    private void showPainChart() {
-        chartEvolution.setVisibility(View.VISIBLE);
-        chartFrequency.setVisibility(View.GONE);
-
-        if (checkInHistory.isEmpty()) { showEmptyChart(); return; }
-
-        // Agrupa por mês e calcula média de dor
-        Map<Integer, List<Integer>> byMonth = new TreeMap<>();
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
-        Calendar cal = Calendar.getInstance();
-        for (CheckInHistoryResponse c : checkInHistory) {
-            if (c.getExecutedAt() == null) continue;
-            try {
-                java.util.Date d = sdf.parse(c.getExecutedAt().substring(0, 10));
-                if (d == null) continue;
-                cal.setTime(d);
-                int m = cal.get(Calendar.MONTH);
-                byMonth.computeIfAbsent(m, k -> new ArrayList<>()).add(c.getPainLevel());
-            } catch (Exception ignored) {}
-        }
-
-        if (byMonth.isEmpty()) { showEmptyChart(); return; }
-
-        List<Entry> entries = new ArrayList<>();
-        for (Map.Entry<Integer, List<Integer>> e : byMonth.entrySet()) {
-            float avg = 0;
-            for (int v : e.getValue()) avg += v;
-            avg /= e.getValue().size();
-            entries.add(new Entry(e.getKey(), avg));
-        }
-
-        LineDataSet ds = new LineDataSet(entries, "Dor");
-        ds.setColor(ContextCompat.getColor(this, R.color.maya_salmon));
-        ds.setCircleColor(ContextCompat.getColor(this, R.color.maya_salmon));
-        ds.setLineWidth(3f);
-        ds.setDrawCircles(true);
-        ds.setMode(LineDataSet.Mode.CUBIC_BEZIER);
-        ds.setDrawValues(false);
-        styleLineChart(new LineData(ds));
-    }
-
-    private void showImprovementChart() {
-        chartEvolution.setVisibility(View.VISIBLE);
-        chartFrequency.setVisibility(View.GONE);
-
-        if (checkInHistory.isEmpty()) { showEmptyChart(); return; }
-
-        // Usa feelingLevel (bem-estar) por mês — mostra melhora de bem-estar
-        Map<Integer, List<Integer>> byMonth = new TreeMap<>();
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
-        Calendar cal = Calendar.getInstance();
-        for (CheckInHistoryResponse c : checkInHistory) {
-            if (c.getExecutedAt() == null) continue;
-            try {
-                java.util.Date d = sdf.parse(c.getExecutedAt().substring(0, 10));
-                if (d == null) continue;
-                cal.setTime(d);
-                int m = cal.get(Calendar.MONTH);
-                int feeling = c.getFeelingLevel() > 0 ? c.getFeelingLevel() : (5 - Math.min(c.getPainLevel() / 2, 4));
-                byMonth.computeIfAbsent(m, k -> new ArrayList<>()).add(feeling);
-            } catch (Exception ignored) {}
-        }
-
-        if (byMonth.isEmpty()) { showEmptyChart(); return; }
-
-        List<Entry> entries = new ArrayList<>();
-        for (Map.Entry<Integer, List<Integer>> e : byMonth.entrySet()) {
-            float avg = 0;
-            for (int v : e.getValue()) avg += v;
-            avg /= e.getValue().size();
-            entries.add(new Entry(e.getKey(), avg));
-        }
-
-        LineDataSet ds = new LineDataSet(entries, "Melhora");
-        ds.setColor(ContextCompat.getColor(this, R.color.maya_dark_teal));
-        ds.setCircleColor(ContextCompat.getColor(this, R.color.maya_dark_teal));
-        ds.setLineWidth(3f);
-        ds.setDrawCircles(true);
-        ds.setMode(LineDataSet.Mode.CUBIC_BEZIER);
-        ds.setDrawValues(false);
-        styleLineChart(new LineData(ds));
-    }
-
-    private void showFrequencyChart() {
-        chartEvolution.setVisibility(View.GONE);
-        chartFrequency.setVisibility(View.VISIBLE);
-
-        if (checkInHistory.isEmpty()) {
-            chartFrequency.clear();
-            chartFrequency.setNoDataText("Sem dados ainda — complete uma sessão!");
-            chartFrequency.invalidate();
-            return;
-        }
-
-        Map<Integer, Integer> byDay = new HashMap<>();
-        for (int d : new int[]{Calendar.MONDAY, Calendar.TUESDAY, Calendar.WEDNESDAY,
-                Calendar.THURSDAY, Calendar.FRIDAY, Calendar.SATURDAY, Calendar.SUNDAY}) {
-            byDay.put(d, 0);
-        }
-
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
-        Calendar cal = Calendar.getInstance();
-        for (CheckInHistoryResponse c : checkInHistory) {
-            if (c.getExecutedAt() == null) continue;
-            try {
-                java.util.Date d = sdf.parse(c.getExecutedAt().substring(0, 10));
-                if (d == null) continue;
-                cal.setTime(d);
-                int day = cal.get(Calendar.DAY_OF_WEEK);
-                byDay.merge(day, 1, Integer::sum);
-            } catch (Exception ignored) {}
-        }
-
-        int[] order = {Calendar.MONDAY, Calendar.TUESDAY, Calendar.WEDNESDAY,
-                Calendar.THURSDAY, Calendar.FRIDAY, Calendar.SATURDAY, Calendar.SUNDAY};
-        String[] labels = {"SEG", "TER", "QUA", "QUI", "SEX", "SÁB", "DOM"};
-
-        List<BarEntry> entries = new ArrayList<>();
-        for (int i = 0; i < order.length; i++) {
-            entries.add(new BarEntry(i, byDay.getOrDefault(order[i], 0)));
-        }
-
-        BarDataSet ds = new BarDataSet(entries, "Frequência");
-        ds.setColor(ContextCompat.getColor(this, R.color.maya_dark_teal));
-        ds.setDrawValues(false);
-
-        BarData barData = new BarData(ds);
-        barData.setBarWidth(0.5f);
-
-        chartFrequency.setData(barData);
-        chartFrequency.getDescription().setEnabled(false);
-        chartFrequency.getLegend().setEnabled(false);
-        chartFrequency.getAxisRight().setEnabled(false);
-        chartFrequency.setNoDataText("Nenhum dado disponível");
-
-        XAxis xAxis = chartFrequency.getXAxis();
-        xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
-        xAxis.setDrawGridLines(false);
-        xAxis.setGranularity(1f);
-        xAxis.setValueFormatter(new ValueFormatter() {
-            @Override
-            public String getFormattedValue(float value) {
-                int i = (int) value;
-                return (i >= 0 && i < labels.length) ? labels[i] : "";
-            }
-        });
-
-        YAxis yAxis = chartFrequency.getAxisLeft();
-        yAxis.setAxisMinimum(0f);
-        yAxis.setGranularity(1f);
-        yAxis.setDrawGridLines(true);
-        chartFrequency.invalidate();
-    }
-
-    private void styleLineChart(LineData data) {
-        chartEvolution.setData(data);
-        chartEvolution.getDescription().setEnabled(false);
-        chartEvolution.getLegend().setEnabled(false);
-        chartEvolution.getAxisRight().setEnabled(false);
-        chartEvolution.setNoDataText("Nenhum dado disponível");
-
-        XAxis xAxis = chartEvolution.getXAxis();
-        xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
-        xAxis.setDrawGridLines(false);
-        xAxis.setGranularity(1f);
-        xAxis.setValueFormatter(new ValueFormatter() {
-            private final String[] months = {"JAN","FEV","MAR","ABR","MAI","JUN","JUL","AGO","SET","OUT","NOV","DEZ"};
-            @Override
-            public String getFormattedValue(float value) {
-                int i = (int) value;
-                return (i >= 0 && i < months.length) ? months[i] : "";
-            }
-        });
-
-        YAxis yAxis = chartEvolution.getAxisLeft();
-        yAxis.setAxisMinimum(0f);
-        yAxis.setGranularity(1f);
-        yAxis.setDrawGridLines(true);
-        yAxis.setGridColor(Color.LTGRAY);
-        chartEvolution.invalidate();
-    }
-
-    private void showEmptyChart() {
-        chartEvolution.clear();
-        chartEvolution.setNoDataText("Sem dados ainda — complete uma sessão!");
-        chartEvolution.invalidate();
+    private int dp(int value) {
+        return (int) (value * getResources().getDisplayMetrics().density);
     }
 
     // ─── BOTTOM NAV ──────────────────────────────────────────────────────────
@@ -514,12 +435,6 @@ public class EvolutionActivity extends BaseAuthActivity {
         findViewById(R.id.navSchedule).setOnClickListener(v -> startActivity(new Intent(this, com.maya.rpg.ui.schedule.ScheduleActivity.class)));
         findViewById(R.id.navEvolution).setOnClickListener(v -> {});
         findViewById(R.id.navMore).setOnClickListener(v -> startActivity(new Intent(this, ProfileActivity.class)));
-    }
-
-    // ─── UTILS ───────────────────────────────────────────────────────────────
-
-    private int dp(int value) {
-        return (int) (value * getResources().getDisplayMetrics().density);
     }
 
     // ─── INNER CLASSES ───────────────────────────────────────────────────────

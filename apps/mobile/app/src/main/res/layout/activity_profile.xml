@@ -79,17 +79,6 @@
                             android:src="@drawable/ic_person"
                             app:shapeAppearanceOverlay="@style/ShapeAppearance.Maya.RoundedCircle" />
 
-                        <ImageView
-                            android:id="@+id/ivEditPhoto"
-                            android:layout_width="24dp"
-                            android:layout_height="24dp"
-                            android:layout_gravity="bottom|end"
-                            android:background="@drawable/bg_button_teal"
-                            android:padding="4dp"
-                            android:src="@drawable/ic_settings_edit"
-                            android:clickable="true"
-                            android:focusable="true"
-                            app:tint="@color/white" />
                     </FrameLayout>
 
                     <TextView

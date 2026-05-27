@@ -57,7 +57,6 @@ public class ProfileActivity extends BaseAuthActivity {
 
         findViewById(R.id.btnBack).setOnClickListener(v -> finish());
         findViewById(R.id.btnLogout).setOnClickListener(v -> showLogoutConfirmation());
-        findViewById(R.id.ivEditPhoto).setOnClickListener(v -> openImagePicker());
 
         View.OnClickListener comingSoon = v -> Toast.makeText(this, "Funcionalidade em breve", Toast.LENGTH_SHORT).show();
         findViewById(R.id.rowEditProfile).setOnClickListener(v -> startActivity(new Intent(this, EditProfileActivity.class)));
