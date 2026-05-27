@@ -53,9 +53,16 @@ function Dashboard() {
     queryFn: () => dashboardService.getStats(),
   });
 
+  const [appointmentView, setAppointmentView] = useState<"today" | "tomorrow">("today");
+
   const { data: todayAppointments } = useQuery({
     queryKey: ["appointments-today"],
     queryFn: () => appointmentService.getToday(),
+  });
+
+  const { data: tomorrowAppointments } = useQuery({
+    queryKey: ["appointments-tomorrow"],
+    queryFn: () => appointmentService.getTomorrow(),
   });
 
   const { data: nextAppointment } = useQuery({
@@ -95,7 +102,9 @@ function Dashboard() {
   const todayStr = format(today, "EEEE, d 'de' MMMM 'de' yyyy", { locale: ptBR });
   const nextAppt = nextAppointment;
 
-  const todayAppts = todayAppointments || [];
+  const visibleAppts =
+    appointmentView === "today" ? (todayAppointments || []) : (tomorrowAppointments || []);
+  const todayAppts = visibleAppts;
 
   const patients = patientsData?.data || [];
   // Parse birthDate as local date (strings like "1990-05-13" are UTC midnight by default,
@@ -166,12 +175,33 @@ function Dashboard() {
           <Card className="bg-gradient-hero lg:col-span-2">
             <div className="flex items-center justify-between">
               <div>
-                <Badge tone="primary">Hoje</Badge>
+                <div className="flex gap-1 rounded-lg bg-background/40 p-1">
+                  <button
+                    onClick={() => setAppointmentView("today")}
+                    className={`rounded-md px-3 py-1 text-xs font-medium transition ${
+                      appointmentView === "today"
+                        ? "bg-primary text-primary-foreground shadow-sm"
+                        : "text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    Hoje
+                  </button>
+                  <button
+                    onClick={() => setAppointmentView("tomorrow")}
+                    className={`rounded-md px-3 py-1 text-xs font-medium transition ${
+                      appointmentView === "tomorrow"
+                        ? "bg-primary text-primary-foreground shadow-sm"
+                        : "text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    Amanhã
+                  </button>
+                </div>
                 <h2 className="mt-2 font-display text-xl">
-                  {todayCount} atendimento{todayCount !== 1 ? "s" : ""}
+                  {visibleAppts.length} atendimento{visibleAppts.length !== 1 ? "s" : ""}
                 </h2>
               </div>
-              {nextAppt && (
+              {nextAppt && appointmentView === "today" && (
                 <p className="text-sm text-muted-foreground">
                   Próximo:{" "}
                   <span className="font-medium text-foreground">
@@ -186,7 +216,7 @@ function Dashboard() {
             <div className="mt-4 space-y-2 max-h-64 overflow-y-auto">
               {!todayAppts || todayAppts.length === 0 ? (
                 <p className="py-8 text-center text-sm text-muted-foreground">
-                  Nenhum atendimento agendado para hoje.
+                  Nenhum atendimento agendado para {appointmentView === "today" ? "hoje" : "amanhã"}.
                 </p>
               ) : (
                 todayAppts.map((a) => (

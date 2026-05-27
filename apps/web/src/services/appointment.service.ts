@@ -45,6 +45,15 @@ export const appointmentService = {
     return this.getAppointmentsForRange(start, end);
   },
 
+  async getTomorrow(): Promise<ClinicAppointment[]> {
+    const start = new Date();
+    start.setHours(0, 0, 0, 0);
+    start.setDate(start.getDate() + 1);
+    const end = new Date(start);
+    end.setDate(start.getDate() + 1);
+    return this.getAppointmentsForRange(start, end);
+  },
+
   async getNext(): Promise<ClinicAppointment | null> {
     const now = new Date();
     const nextMonth = new Date(now);
