@@ -1,0 +1,31 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="120dp"
+    android:height="120dp"
+    android:viewportWidth="120"
+    android:viewportHeight="120">
+    <!-- Vertebrae -->
+    <path
+        android:strokeColor="#4A454D"
+        android:strokeWidth="2"
+        android:pathData="M55,30 L75,30 L80,45 L50,45 Z" />
+    <path
+        android:strokeColor="#4A454D"
+        android:strokeWidth="2"
+        android:pathData="M53,50 L77,50 L82,65 L48,65 Z" />
+    <path
+        android:strokeColor="#4A454D"
+        android:strokeWidth="2"
+        android:pathData="M50,70 L80,70 L85,85 L45,85 Z" />
+    <path
+        android:strokeColor="#4A454D"
+        android:strokeWidth="2"
+        android:pathData="M48,90 L82,90 L87,105 L43,105 Z" />
+    <!-- Pink target circle -->
+    <path
+        android:strokeColor="#F27D6B"
+        android:strokeWidth="1.5"
+        android:pathData="M50,55 m-10,0 a10,10 0 1,1 20,0 a10,10 0 1,1 -20,0" />
+    <path
+        android:fillColor="#F27D6B"
+        android:pathData="M50,55 m-6,0 a6,6 0 1,1 12,0 a6,6 0 1,1 -12,0" />
+</vector>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Login screen gradient: top = rich teal (#2BBCD4), center = sky blue (#6FD6E3),
+    bottom = near-white (#EEF9FB).
+    Three-stop gradient achieved with a centerColor.
+    angle="270" = top → bottom.
+-->
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <gradient
+        android:startColor="#2BBCD4"
+        android:centerColor="#7ED8E8"
+        android:endColor="#EEF9FB"
+        android:angle="270" />
+</shape>

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "673964827796",
+    "project_id": "mayarpg-9985f",
+    "storage_bucket": "mayarpg-9985f.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:673964827796:android:2fa63c9d2a7f0c0668c081",
+        "android_client_info": {
+          "package_name": "com.maya.rpg"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBUvztskfCflS2fRWYR0fBm50lIdOx_g00"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

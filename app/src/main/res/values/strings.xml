@@ -1,0 +1,156 @@
+<resources>
+    <string name="app_name">Maya RPG</string>
+
+    <string name="welcome_text">BEM-VINDO</string>
+    <string name="btn_start_desc">Iniciar aplicativo</string>
+    <string name="desc_logo">Logo Maya RPG</string>
+    <string name="login_title">LOGIN</string>
+    <string name="login_email_label">Email/Telefone:</string>
+    <string name="login_password_label">Senha:</string>
+    <string name="login_terms">Aceito os Termos de Uso</string>
+    <string name="login_forgot_password">esqueceu a senha?</string>
+    <string name="login_signup_prompt">Ainda não possui cadastro? Cadastre-se</string>
+    <string name="login_social_label">Entre de Outras Formas</string>
+    <string name="btn_entrar">ENTRAR</string>
+
+    <string name="content_desc_back">Voltar</string>
+    <string name="content_desc_nav_home">Tela inicial</string>
+    <string name="content_desc_nav_exercises">Exercícios</string>
+    <string name="content_desc_nav_evolution">Evolução</string>
+    <string name="content_desc_nav_more">Mais opções</string>
+    <string name="content_desc_profile_avatar">Foto de perfil</string>
+    <string name="content_desc_schedule_icon">Ícone de agendamento</string>
+    <string name="content_desc_chat_icon">Ícone de mensagens</string>
+    <string name="content_desc_agenda_icon">Ícone de agenda</string>
+    <string name="content_desc_prev_month">Mês anterior</string>
+    <string name="content_desc_next_month">Próximo mês</string>
+
+    <string name="home_welcome">Bem-Vindo de volta</string>
+    <string name="home_consistency_message">Mantenha a consistência, cada movimento conta! :)</string>
+    <string name="home_next_appointment_loading">Próxima consulta: carregando…</string>
+    <string name="home_card_schedule_title">Agende\nSuas\nSessões</string>
+    <string name="home_card_schedule_cta">Clique Aqui</string>
+    <string name="home_card_chat_title">Surgiu\nalguma\ndúvida?</string>
+    <string name="home_card_chat_cta">Fale com a Maya</string>
+    <string name="home_card_agenda_title">Confira\nsua\nAgenda</string>
+    <string name="home_card_agenda_cta">Clique</string>
+
+    <string name="title_schedule">Agendar Sessão</string>
+    <string name="legend_selected">● Selecionado</string>
+    <string name="legend_reserved">● Reservado</string>
+    <string name="label_hours">Horários:</string>
+    <string name="label_batch_scheduling">Agendamento em Lote</string>
+    <string name="btn_batch_sessions">+ 3 Sessões</string>
+    <string name="label_optional_notes">Descreva o que está sentindo (opcional)</string>
+    <string name="hint_schedule_notes">O que for escrito aqui será passado para Dra. Maya</string>
+    <string name="btn_request_session">SOLICITAR SESSÃO</string>
+
+    <string name="title_my_agenda">Minha Agenda</string>
+    <string name="tab_upcoming">Próximos</string>
+    <string name="tab_history">Histórico</string>
+    <string name="tab_all">Todos</string>
+
+    <string name="title_messages">Mensagens</string>
+    <string name="hint_search_conversations">Buscar conversas</string>
+    <string name="label_your_conversations">Suas Conversas</string>
+    <string name="title_chat_bot">Chat Bot Dra Maya</string>
+    <string name="subtitle_chat_faq">Canal de Dúvidas Frequentes</string>
+    <string name="hint_message">Mensagem</string>
+    <string name="btn_send">Enviar</string>
+
+    <string name="title_settings">Configurações</string>
+    <string name="placeholder_name">Sandra Lima</string>
+    <string name="placeholder_email">sandra@email.com</string>
+    <string name="label_account">Conta</string>
+    <string name="label_edit_profile">Editar Perfil</string>
+    <string name="label_security_password">Segurança e Senha</string>
+    <string name="label_privacy_data">Privacidade e Dados</string>
+    <string name="label_delete_account">Excluir conta</string>
+    <string name="label_preferences">Preferências</string>
+    <string name="label_notifications">Notificações</string>
+    <string name="label_language">Idioma</string>
+    <string name="label_theme">Tema</string>
+    <string name="btn_logout">Sair</string>
+
+    <string name="title_edit_profile">Editar Perfil</string>
+    <string name="hint_name">Nome</string>
+    <string name="hint_phone">Telefone</string>
+    <string name="hint_birth_date">Data de nascimento (YYYY-MM-DD)</string>
+    <string name="btn_save">SALVAR</string>
+
+    <string name="title_plan_registered">Plano Registrado!!</string>
+    <string name="msg_session_registered">Sua sessão foi finalizada e registrada.</string>
+    <string name="msg_doctor_received_feedback">A Dra. Maya já recebeu seu feedback.</string>
+    <string name="btn_back_to_plan">VOLTAR AO PLANO</string>
+    <string name="btn_view_evolution">VER EVOLUÇÃO</string>
+
+    <string name="title_exercise_plan">Plano de Exercícios</string>
+    <string name="subtitle_exercise_plan">Aqui estão as orientações da Dra. Maya</string>
+    <string name="hint_search_plan">Pesquisar no plano…</string>
+    <string name="msg_offline_mode">Modo offline — exibindo dados salvos localmente</string>
+    <string name="msg_no_plan_found">Nenhum plano encontrado</string>
+
+    <string name="label_pain_level">Nível de dor: não informar</string>
+    <string name="label_pain_none">Sem dor</string>
+    <string name="label_pain_intense">Dor intensa</string>
+    <string name="label_exercise_performed">Exercício realizado</string>
+    <string name="hint_checkin_notes">Observações (opcional)</string>
+    <string name="btn_check_in">Fazer Check-in do Treino</string>
+    <string name="label_feeling_scale">Como você se sentiu?</string>
+    <string name="label_feeling_bad">Mal</string>
+    <string name="label_feeling_good">Bem</string>
+    <string name="label_exercises_completed">Exercícios concluídos</string>
+    <string name="btn_register_plan">REGISTRAR PLANO</string>
+
+    <string name="title_evolution">Minha Evolução</string>
+    <string name="tab_pain">Dor</string>
+    <string name="tab_improvement">Melhora</string>
+    <string name="tab_frequency">Frequência</string>
+    <string name="label_pain_evolution">Evolução do Nível de Dor</string>
+    <string name="label_improvement_evolution">Evolução da Melhora</string>
+    <string name="label_completed_workouts">Treinos Concluídos</string>
+    <string name="label_weekly_frequency">Frequência Semanal (Meta: 3x)</string>
+    <string name="label_workout_history">Histórico de Treinos</string>
+    <string name="msg_no_workouts">Nenhum treino registrado ainda.</string>
+    <string name="home_days_count">0\ndias</string>
+    <string name="day_mon_07">SEG\n07</string>
+    <string name="day_tue_08">TER\n08</string>
+    <string name="day_wed_09">QUA\n09</string>
+    <string name="day_thu_10">QUI\n10</string>
+    <string name="day_fri_11">SEX\n11</string>
+    <string name="plan_header_title">Bem-Vindo ao Seu</string>
+    <string name="plan_main_title">Plano de Exercícios</string>
+    <string name="plan_subtitle">Aqui estão as orientações da Dra. Maya.\nConfira sua rotina de RPG e exercícios para esta semana.</string>
+    <string name="hint_search_plan_alt">Pesquisar no seu plano</string>
+    <string name="label_postural_foco">Foco: Mobilidade, Consciência, Alinhamento</string>
+    <string name="label_balance_foco">Foco: Equilíbrio, Alongamento</string>
+    <string name="title_configuracoes">Configurações</string>
+    <string name="label_sair">Sair</string>
+    <string name="msg_logout_confirm_title">Tem certeza que deseja sair da sua conta?</string>
+    <string name="msg_logout_confirm_subtitle">Você precisará fazer login novamente para acessar seus exercícios.</string>
+    <string name="btn_voltar">Voltar</string>
+    <string name="login_email_hint">Email ou Telefone</string>
+    <string name="login_password_hint">Sua Senha</string>
+
+    <string name="recover_forgot_title">Esqueceu\nSua Senha?</string>
+    <string name="recover_forgot_desc">Digite seu e-mail cadastrado e enviaremos um link para você criar uma nova senha.</string>
+    <string name="recover_label_email">Email:</string>
+    <string name="recover_hint_email">Digite o email cadastrado</string>
+    <string name="recover_btn_send">Enviar Link de Redefinição</string>
+    <string name="recover_back_to_login">Lembrei minha senha? Fazer Login</string>
+    <string name="recover_title_reset">Redefinir Senha</string>
+    <string name="recover_desc_reset">Insira o código enviado para o seu e-mail e escolha sua nova senha.</string>
+    <string name="recover_label_code">Código (Token):</string>
+    <string name="recover_hint_code">Código recebido</string>
+    <string name="recover_label_new_password">Nova Senha:</string>
+    <string name="recover_hint_new_password">Mínimo 6 caracteres</string>
+    <string name="recover_btn_save">Salvar Nova Senha</string>
+    <string name="recover_try_again">Não recebeu? Tentar novamente</string>
+
+    <string name="recover_msg_code_sent">Código enviado! Verifique sua caixa de entrada.</string>
+    <string name="recover_msg_error_request">Erro ao solicitar recuperação. Verifique o e-mail.</string>
+    <string name="recover_msg_error_connection">Falha de conexão. Tente novamente.</string>
+    <string name="recover_msg_success_reset">Senha alterada com sucesso! Faça login.</string>
+    <string name="recover_msg_invalid_code">Código inválido ou expirado.</string>
+    <string name="recover_msg_session_expired">Sessão expirada. Solicite um novo código.</string>
+</resources>
