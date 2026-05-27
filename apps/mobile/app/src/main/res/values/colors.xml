@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+
+    <color name="splash_blue_start">#55C7D9</color>
+    <color name="maya_bg_bege">#F8F7F4</color>
+    <color name="maya_salmon">#F27D6B</color>
+    <color name="maya_dark_teal">#1A4F5C</color>
+    <color name="maya_nav_teal">#01577A</color>
+    <color name="maya_teal_header">#2B7A8C</color>
+    <color name="maya_coral">#EE715F</color>
+    <color name="maya_blue_text">#3EBAD2</color>
+    <color name="maya_bg_soft">#F5EEE3</color>
+    <color name="maya_sand">#E2D1B3</color>
+    <color name="maya_brown">#81542D</color>
+    <color name="maya_gray_stroke">#49454F</color>
+</resources>

@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cd /c/Users/25027592/Desktop/maya-rpg-web && find src -type f -name \"*.ts\" -o -name \"*.tsx\" | head -30)",
+      "Read(//c/c/Users/25027592/Desktop/maya-rpg-web/**)",
+      "Bash(cat)",
+      "Read(//c/Users/25027592/.claude/plans/**)",
+      "Bash(awk '{print $NF}')",
+      "Bash(grep -r \"req\\\\\\\\.user\\\\\\\\.id\\\\|req\\\\\\\\.body\\\\|@Query\\\\|@Param\" \"/c/Users/25027592/Desktop/maya-rpg-api/src\" --include=\"*.ts\")",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(npm run *)"
+    ]
+  }
+}

@@ -1,0 +1,23 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="120dp"
+    android:height="120dp"
+    android:viewportWidth="120"
+    android:viewportHeight="120">
+    <!-- Body Outline -->
+    <path
+        android:strokeColor="#4A454D"
+        android:strokeWidth="1.5"
+        android:pathData="M30,80 L30,60 C30,50 40,40 50,35 C55,32 65,32 70,35 C85,40 95,50 95,65 L95,85" />
+    <path
+        android:strokeColor="#4A454D"
+        android:strokeWidth="1.5"
+        android:pathData="M35,35 L40,55 M85,45 L80,65" />
+    <!-- Pink target circle -->
+    <path
+        android:strokeColor="#F27D6B"
+        android:strokeWidth="1.5"
+        android:pathData="M45,45 m-10,0 a10,10 0 1,1 20,0 a10,10 0 1,1 -20,0" />
+    <path
+        android:fillColor="#F27D6B"
+        android:pathData="M45,45 m-6,0 a6,6 0 1,1 12,0 a6,6 0 1,1 -12,0" />
+</vector>
