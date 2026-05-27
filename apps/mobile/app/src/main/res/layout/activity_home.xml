@@ -464,6 +464,77 @@
                             app:layout_constraintStart_toEndOf="@id/tvDay4"
                             app:layout_constraintTop_toTopOf="parent" />
                     </androidx.constraintlayout.widget.ConstraintLayout>
+
+                    <!-- Painel de detalhe do dia selecionado -->
+                    <View
+                        android:id="@+id/dividerDayDetail"
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:layout_marginTop="12dp"
+                        android:background="#D9C9B6"
+                        android:visibility="gone"
+                        app:layout_constraintTop_toBottomOf="@id/rowDays" />
+
+                    <LinearLayout
+                        android:id="@+id/layoutDayDetail"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:orientation="vertical"
+                        android:visibility="gone"
+                        app:layout_constraintTop_toBottomOf="@id/dividerDayDetail">
+
+                        <TextView
+                            android:id="@+id/tvDayDetailEmpty"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="center"
+                            android:paddingVertical="8dp"
+                            android:text="Nenhuma consulta neste dia"
+                            android:textColor="#8B6E5B"
+                            android:textSize="13sp" />
+
+                        <androidx.constraintlayout.widget.ConstraintLayout
+                            android:id="@+id/cardDayAppointment"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:background="@drawable/bg_day_appointment"
+                            android:padding="12dp"
+                            android:visibility="gone">
+
+                            <TextView
+                                android:id="@+id/tvDayApptTime"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textColor="@color/maya_dark_teal"
+                                android:textSize="22sp"
+                                android:textStyle="bold"
+                                app:layout_constraintStart_toStartOf="parent"
+                                app:layout_constraintTop_toTopOf="parent" />
+
+                            <TextView
+                                android:id="@+id/tvDayApptStatus"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="2dp"
+                                android:textSize="13sp"
+                                app:layout_constraintStart_toStartOf="parent"
+                                app:layout_constraintTop_toBottomOf="@id/tvDayApptTime" />
+
+                            <TextView
+                                android:id="@+id/tvDayApptType"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="2dp"
+                                android:textColor="#8B6E5B"
+                                android:textSize="12sp"
+                                app:layout_constraintStart_toStartOf="parent"
+                                app:layout_constraintTop_toBottomOf="@id/tvDayApptStatus" />
+
+                        </androidx.constraintlayout.widget.ConstraintLayout>
+
+                    </LinearLayout>
+
                 </androidx.constraintlayout.widget.ConstraintLayout>
             </com.google.android.material.card.MaterialCardView>
 

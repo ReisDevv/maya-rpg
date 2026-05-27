@@ -49,6 +49,8 @@ public class HomeActivity extends BaseAuthActivity {
     private static final int REQUEST_POST_NOTIFICATIONS = 1001;
     private Calendar currentWeekCalendar;
     private List<TextView> dayTextViews;
+    private int selectedDayIndex = -1;
+    private List<Appointment> weekAppointments = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -183,18 +185,34 @@ public class HomeActivity extends BaseAuthActivity {
         SimpleDateFormat dayFormat = new SimpleDateFormat("EEE", new Locale("pt", "BR"));
         SimpleDateFormat numberFormat = new SimpleDateFormat("dd", Locale.getDefault());
 
+        // Ao trocar de semana, desmarca seleção e esconde painel
+        selectedDayIndex = -1;
+        hideDayDetail();
+
         for (int i = 0; i < 5; i++) {
             TextView tv = dayTextViews.get(i);
             String dayName = dayFormat.format(tempCal.getTime()).toUpperCase().substring(0, 3);
             String dayNumber = numberFormat.format(tempCal.getTime());
             tv.setText(dayName + "\n" + dayNumber);
-            tv.setBackground(null); // Clear previous selection
+            tv.setBackground(null);
             tv.setTypeface(null, android.graphics.Typeface.NORMAL);
+
+            final int dayIndex = i;
+            tv.setClickable(true);
+            tv.setFocusable(true);
+            tv.setOnClickListener(v -> selectDay(dayIndex));
 
             tempCal.add(Calendar.DAY_OF_MONTH, 1);
         }
 
         fetchAppointmentsForCalendar();
+    }
+
+    private void selectDay(int index) {
+        selectedDayIndex = index;
+        // Redesenha destaques (mantém seleção)
+        applyDayHighlights();
+        showDayDetail(index);
     }
 
     private void fetchAppointmentsForCalendar() {
@@ -203,7 +221,9 @@ public class HomeActivity extends BaseAuthActivity {
             @Override
             public void onResponse(Call<PaginatedResponse<Appointment>> call, Response<PaginatedResponse<Appointment>> response) {
                 if (response.isSuccessful() && response.body() != null && response.body().getData() != null) {
-                    highlightAppointments(response.body().getData());
+                    weekAppointments = response.body().getData();
+                    applyDayHighlights();
+                    if (selectedDayIndex >= 0) showDayDetail(selectedDayIndex);
                 }
             }
 
@@ -212,21 +232,134 @@ public class HomeActivity extends BaseAuthActivity {
         });
     }
 
-    private void highlightAppointments(List<Appointment> appointments) {
+    private void applyDayHighlights() {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
         Calendar tempCal = (Calendar) currentWeekCalendar.clone();
 
         for (int i = 0; i < 5; i++) {
-            String currentDayStr = sdf.format(tempCal.getTime());
-            for (Appointment app : appointments) {
-                if (app.getDateTime() != null && app.getDateTime().startsWith(currentDayStr)) {
-                    dayTextViews.get(i).setBackgroundResource(R.drawable.bg_day_selected);
-                    dayTextViews.get(i).setTypeface(null, android.graphics.Typeface.BOLD);
+            TextView tv = dayTextViews.get(i);
+            String dayStr = sdf.format(tempCal.getTime());
+
+            boolean isSelected = (i == selectedDayIndex);
+            boolean hasAppointment = false;
+            for (Appointment app : weekAppointments) {
+                if (app.getDateTime() != null && localDateOf(app.getDateTime()).equals(dayStr)) {
+                    hasAppointment = true;
                     break;
                 }
             }
+
+            if (isSelected) {
+                tv.setBackgroundResource(R.drawable.bg_day_selected);
+                tv.setTypeface(null, android.graphics.Typeface.BOLD);
+                tv.setTextColor(android.graphics.Color.WHITE);
+            } else if (hasAppointment) {
+                tv.setBackgroundResource(R.drawable.bg_day_has_appointment);
+                tv.setTypeface(null, android.graphics.Typeface.BOLD);
+                tv.setTextColor(android.graphics.Color.BLACK);
+            } else {
+                tv.setBackground(null);
+                tv.setTypeface(null, android.graphics.Typeface.NORMAL);
+                tv.setTextColor(android.graphics.Color.BLACK);
+            }
+
             tempCal.add(Calendar.DAY_OF_MONTH, 1);
         }
+    }
+
+    private void showDayDetail(int index) {
+        android.widget.LinearLayout layoutDayDetail = findViewById(R.id.layoutDayDetail);
+        View divider = findViewById(R.id.dividerDayDetail);
+        TextView tvEmpty = findViewById(R.id.tvDayDetailEmpty);
+        View cardAppt = findViewById(R.id.cardDayAppointment);
+        TextView tvTime = findViewById(R.id.tvDayApptTime);
+        TextView tvStatus = findViewById(R.id.tvDayApptStatus);
+        TextView tvType = findViewById(R.id.tvDayApptType);
+
+        if (layoutDayDetail == null) return;
+
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
+        Calendar tempCal = (Calendar) currentWeekCalendar.clone();
+        tempCal.add(Calendar.DAY_OF_MONTH, index);
+        String dayStr = sdf.format(tempCal.getTime());
+
+        Appointment found = null;
+        for (Appointment app : weekAppointments) {
+            if (app.getDateTime() != null && localDateOf(app.getDateTime()).equals(dayStr)) {
+                found = app;
+                break;
+            }
+        }
+
+        divider.setVisibility(View.VISIBLE);
+        layoutDayDetail.setVisibility(View.VISIBLE);
+
+        if (found == null) {
+            tvEmpty.setVisibility(View.VISIBLE);
+            cardAppt.setVisibility(View.GONE);
+        } else {
+            tvEmpty.setVisibility(View.GONE);
+            cardAppt.setVisibility(View.VISIBLE);
+
+            // Horário em Brasília
+            try {
+                java.text.SimpleDateFormat inputFmt = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US);
+                inputFmt.setTimeZone(java.util.TimeZone.getTimeZone("UTC"));
+                Date d = inputFmt.parse(found.getDateTime());
+                if (d == null) {
+                    inputFmt = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US);
+                    inputFmt.setTimeZone(java.util.TimeZone.getTimeZone("UTC"));
+                    d = inputFmt.parse(found.getDateTime());
+                }
+                if (d != null) {
+                    java.text.SimpleDateFormat timeFmt = new java.text.SimpleDateFormat("HH:mm", new Locale("pt", "BR"));
+                    timeFmt.setTimeZone(java.util.TimeZone.getTimeZone("America/Sao_Paulo"));
+                    tvTime.setText(timeFmt.format(d));
+                }
+            } catch (Exception ignored) {
+                tvTime.setText("--:--");
+            }
+
+            // Status
+            String status = found.getStatus() != null ? found.getStatus() : "";
+            switch (status.toUpperCase()) {
+                case "CONFIRMED": tvStatus.setText("✓ Confirmada"); tvStatus.setTextColor(android.graphics.Color.parseColor("#2E7D32")); break;
+                case "PENDING":   tvStatus.setText("⏳ Aguardando confirmação"); tvStatus.setTextColor(android.graphics.Color.parseColor("#E65100")); break;
+                case "CANCELLED": tvStatus.setText("✕ Cancelada"); tvStatus.setTextColor(android.graphics.Color.parseColor("#C62828")); break;
+                default:          tvStatus.setText(status); tvStatus.setTextColor(android.graphics.Color.GRAY);
+            }
+
+            // Tipo
+            tvType.setText("Sessão de " + (found.getDurationMinutes() > 0 ? found.getDurationMinutes() + " min" : "RPG"));
+        }
+    }
+
+    private void hideDayDetail() {
+        View divider = findViewById(R.id.dividerDayDetail);
+        android.widget.LinearLayout layout = findViewById(R.id.layoutDayDetail);
+        if (divider != null) divider.setVisibility(View.GONE);
+        if (layout != null) layout.setVisibility(View.GONE);
+    }
+
+    // Converte ISO-8601 UTC para "yyyy-MM-dd" no fuso de Brasília
+    private String localDateOf(String isoUtc) {
+        try {
+            java.text.SimpleDateFormat inputFmt = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US);
+            inputFmt.setTimeZone(java.util.TimeZone.getTimeZone("UTC"));
+            Date d = inputFmt.parse(isoUtc);
+            if (d == null) {
+                inputFmt = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US);
+                inputFmt.setTimeZone(java.util.TimeZone.getTimeZone("UTC"));
+                d = inputFmt.parse(isoUtc);
+            }
+            if (d != null) {
+                java.text.SimpleDateFormat outFmt = new java.text.SimpleDateFormat("yyyy-MM-dd", Locale.US);
+                outFmt.setTimeZone(java.util.TimeZone.getTimeZone("America/Sao_Paulo"));
+                return outFmt.format(d);
+            }
+        } catch (Exception ignored) {}
+        // fallback: primeiros 10 chars (funciona se já vier como data local)
+        return isoUtc.length() >= 10 ? isoUtc.substring(0, 10) : isoUtc;
     }
 
     private void requestNotificationPermissionIfNeeded() {
