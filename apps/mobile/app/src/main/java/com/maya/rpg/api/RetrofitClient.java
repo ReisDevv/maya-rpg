@@ -31,14 +31,13 @@ public class RetrofitClient {
                     .addInterceptor(chain -> {
                         String token = TokenManager.getToken();
                         Request original = chain.request();
+                        Request.Builder builder = original.newBuilder()
+                                .header("X-Client-Type", "mobile")
+                                .method(original.method(), original.body());
                         if (token != null && !token.isEmpty()) {
-                            Request request = original.newBuilder()
-                                    .header("Authorization", "Bearer " + token)
-                                    .method(original.method(), original.body())
-                                    .build();
-                            return chain.proceed(request);
+                            builder.header("Authorization", "Bearer " + token);
                         }
-                        return chain.proceed(original);
+                        return chain.proceed(builder.build());
                     })
                     .authenticator((route, response) -> {
                         if (!shouldAttemptRefresh(response.request())) {
@@ -106,6 +105,7 @@ public class RetrofitClient {
         );
         Request request = new Request.Builder()
                 .url(BuildConfig.API_BASE_URL + "auth/refresh")
+                .header("X-Client-Type", "mobile")
                 .post(body)
                 .build();
 

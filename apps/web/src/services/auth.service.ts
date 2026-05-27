@@ -14,19 +14,19 @@ export const authService = {
       identifier: credentials.email,
       password: credentials.password,
     });
-    tokenStorage.saveTokens(data.accessToken, data.refreshToken);
+    tokenStorage.saveTokens(data.accessToken);
     return data;
   },
 
   async logout(): Promise<void> {
-    const refreshToken = tokenStorage.getRefreshToken();
-    await api.post("auth/logout", { refreshToken });
+    // O cookie httpOnly é enviado automaticamente; a API o apaga via Set-Cookie.
+    await api.post("auth/logout", {});
     tokenStorage.clear();
   },
 
-  async refreshToken(refreshToken: string): Promise<AuthTokens> {
-    const { data } = await api.post<AuthTokens>("auth/refresh", { refreshToken });
-    tokenStorage.saveTokens(data.accessToken, data.refreshToken);
+  async refreshToken(): Promise<AuthTokens> {
+    const { data } = await api.post<AuthTokens>("auth/refresh", {});
+    tokenStorage.saveTokens(data.accessToken);
     return data;
   },
 

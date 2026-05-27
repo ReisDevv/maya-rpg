@@ -108,7 +108,7 @@ export class PatientsService {
         this.userRepo.create({
           name,
           email,
-          password: await bcrypt.hash(cpf, 10),
+          password: await bcrypt.hash(cpf, 12),
           role: UserRole.PATIENT,
           mustChangePassword: true,
         }),

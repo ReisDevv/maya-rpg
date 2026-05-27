@@ -5,6 +5,7 @@ import type { PaginatedRequest } from "@/types";
 
 const api = axios.create({
   baseURL: env.apiUrl,
+  withCredentials: true,
 });
 
 api.interceptors.request.use((config) => {
@@ -12,6 +13,7 @@ api.interceptors.request.use((config) => {
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
+  config.headers['X-Client-Type'] = 'web';
   return config;
 });
 
@@ -32,13 +34,6 @@ api.interceptors.response.use(
     const originalRequest = error.config;
 
     if (error.response?.status === 401 && !originalRequest._retry) {
-      const refreshToken = tokenStorage.getRefreshToken();
-
-      if (!refreshToken) {
-        tokenStorage.clear();
-        return Promise.reject(error);
-      }
-
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });
@@ -49,8 +44,14 @@ api.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        const { data } = await axios.post(`${env.apiUrl}/auth/refresh`, { refreshToken });
-        tokenStorage.saveTokens(data.accessToken, data.refreshToken);
+        // O cookie httpOnly é enviado automaticamente pelo browser (withCredentials: true).
+        // O header X-Client-Type: web instrui a API a ler e renovar via cookie.
+        const { data } = await axios.post(
+          `${env.apiUrl}/auth/refresh`,
+          {},
+          { withCredentials: true, headers: { 'X-Client-Type': 'web' } },
+        );
+        tokenStorage.saveAccessToken(data.accessToken);
         processQueue(null);
         originalRequest.headers.Authorization = `Bearer ${data.accessToken}`;
         return api(originalRequest);

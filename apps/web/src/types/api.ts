@@ -27,7 +27,7 @@ export interface RegisterRequest {
 
 export interface AuthTokens {
   accessToken: string;
-  refreshToken: string;
+  refreshToken?: string;
 }
 
 export interface RecoverPasswordResponse {

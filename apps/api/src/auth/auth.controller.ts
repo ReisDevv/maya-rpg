@@ -1,5 +1,6 @@
-import { Controller, Post, Get, Body, Request, UnauthorizedException, Patch } from '@nestjs/common';
+import { Controller, Post, Get, Body, Request, Response, UnauthorizedException, Patch } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
+import type { Request as ExpressRequest, Response as ExpressResponse, CookieOptions } from 'express';
 
 import { AuthService } from './auth.service';
 import { EmailChangeService } from './email-change.service';
@@ -24,6 +25,18 @@ import { CurrentUser } from './decorators/current-user.decorator';
 import { UserRole } from '../common/enums/user-role.enum';
 import { User } from './entities/user.entity';
 
+const REFRESH_COOKIE_OPTIONS: CookieOptions = {
+  httpOnly: true,
+  secure: true,
+  sameSite: 'strict',
+  maxAge: 7 * 24 * 60 * 60 * 1000,
+  path: '/api/auth/refresh',
+};
+
+function isWebClient(req: ExpressRequest): boolean {
+  return req.headers['x-client-type'] === 'web';
+}
+
 @Controller('auth')
 export class AuthController {
   constructor(
@@ -36,22 +49,44 @@ export class AuthController {
   @Public()
   @Throttle({ default: { limit: 5, ttl: 60000 } })
   @Post('login')
-  login(@Request() req: any, @Body() dto: LoginDto) {
-    return this.authService.login(dto, { ip: req.ip, ua: req.headers['user-agent'] });
+  async login(
+    @Request() req: ExpressRequest,
+    @Response() res: ExpressResponse,
+    @Body() dto: LoginDto,
+  ) {
+    const result = await this.authService.login(dto, { ip: req.ip, ua: req.headers['user-agent'] });
+
+    if (isWebClient(req)) {
+      res.cookie('refreshToken', result.refreshToken, REFRESH_COOKIE_OPTIONS);
+      const { refreshToken: _rt, ...payload } = result;
+      return res.json(payload);
+    }
+
+    return res.json(result);
   }
 
   @Public()
   @Post('refresh')
-  async refresh(@Request() req: any, @Body('refreshToken') refreshToken: string) {
+  async refresh(@Request() req: ExpressRequest, @Response() res: ExpressResponse) {
+    const web = isWebClient(req);
+    const refreshToken: string | undefined = web
+      ? (req.cookies as Record<string, string>)?.refreshToken
+      : (req.body as Record<string, string>)?.refreshToken;
+
     if (!refreshToken) throw new UnauthorizedException('Refresh token não fornecido');
+
     const { user, newRefreshToken } = await this.refreshTokenService.rotate(refreshToken, {
       ip: req.ip,
       ua: req.headers['user-agent'],
     });
-    return {
-      accessToken: await this.authService.generateAccessToken(user),
-      refreshToken: newRefreshToken,
-    };
+    const accessToken = await this.authService.generateAccessToken(user);
+
+    if (web) {
+      res.cookie('refreshToken', newRefreshToken, REFRESH_COOKIE_OPTIONS);
+      return res.json({ accessToken });
+    }
+
+    return res.json({ accessToken, refreshToken: newRefreshToken });
   }
 
   @Public()
@@ -165,9 +200,19 @@ export class AuthController {
 
   @Public()
   @Post('logout')
-  async logout(@Body('refreshToken') refreshToken: string) {
+  async logout(@Request() req: ExpressRequest, @Response() res: ExpressResponse) {
+    const web = isWebClient(req);
+    const refreshToken: string | undefined = web
+      ? (req.cookies as Record<string, string>)?.refreshToken
+      : (req.body as Record<string, string>)?.refreshToken;
+
     if (refreshToken) await this.refreshTokenService.revoke(refreshToken);
-    return { message: 'Logout realizado' };
+
+    if (web) {
+      res.clearCookie('refreshToken', { path: '/api/auth/refresh' });
+    }
+
+    return res.json({ message: 'Logout realizado' });
   }
 
   @Roles(UserRole.PATIENT, UserRole.PROFESSIONAL, UserRole.ADMIN)

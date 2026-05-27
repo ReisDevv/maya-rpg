@@ -103,7 +103,7 @@ export class AuthService {
       throw new ConflictException('E-mail já cadastrado');
     }
 
-    const hashedPassword = await bcrypt.hash(dto.password, 10);
+    const hashedPassword = await bcrypt.hash(dto.password, 12);
 
     const user = this.userRepo.create({
       name: dto.name,
@@ -130,7 +130,7 @@ export class AuthService {
       throw new ConflictException('E-mail já cadastrado');
     }
 
-    const hashedPassword = await bcrypt.hash(dto.password, 10);
+    const hashedPassword = await bcrypt.hash(dto.password, 12);
 
     const user = this.userRepo.create({
       name: dto.name,
@@ -183,7 +183,7 @@ export class AuthService {
       throw new BadRequestException(passwordError);
     }
 
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    const hashedPassword = await bcrypt.hash(newPassword, 12);
     user.password = hashedPassword;
     user.mustChangePassword = false;
 

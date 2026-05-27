@@ -85,9 +85,9 @@ const entities = [
         const logger = new Logger('TypeOrmConfig');
         const host = configService.get<string>('DB_HOST');
         const nodeEnv = configService.get<string>('NODE_ENV') ?? 'development';
-        // DB_SYNC=true must be explicitly set to enable synchronize; never defaults on in prod
+        // Synchronize apenas em development explícito; qualquer outro valor (incluindo undefined) desativa.
         const synchronize =
-          nodeEnv !== 'production' && configService.get<string>('DB_SYNC') !== 'false';
+          nodeEnv === 'development' && configService.get<string>('DB_SYNC') !== 'false';
         const sslEnabled =
           configService.get<string>('DB_SSL') === 'true' || nodeEnv === 'production';
 

@@ -128,7 +128,7 @@ export class PasswordResetService {
       throw new NotFoundException('Usuário não encontrado');
     }
 
-    user.password = await bcrypt.hash(newPassword, 10);
+    user.password = await bcrypt.hash(newPassword, 12);
     user.mustChangePassword = false;
     await this.userRepo.save(user);
 
@@ -171,7 +171,7 @@ export class PasswordResetService {
       throw new NotFoundException('Paciente não encontrado');
     }
 
-    user.password = await bcrypt.hash(newPassword, 10);
+    user.password = await bcrypt.hash(newPassword, 12);
     user.mustChangePassword = false;
     await this.userRepo.save(user);
 
