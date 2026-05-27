@@ -306,9 +306,21 @@ export class AppointmentsService {
 
     const saved = await this.appointmentRepo.save(appointment);
 
-    const displayTime = saved.dateTime.toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' });
-    const notifTitle = 'Nova solicitação de sessão';
-    const notifBody = `${patient.fullName} quer agendar para ${displayTime}. Toque para responder.`;
+    const tz = 'America/Sao_Paulo';
+    const reqDayLabel = saved.dateTime.toLocaleDateString('pt-BR', {
+      timeZone: tz,
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long',
+    });
+    const reqHourLabel = saved.dateTime.toLocaleTimeString('pt-BR', {
+      timeZone: tz,
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+    const firstName = patient.fullName.split(' ')[0];
+    const notifTitle = '📅 Nova solicitação de sessão';
+    const notifBody = `${firstName} quer agendar para ${reqDayLabel} às ${reqHourLabel}. Toque para aceitar ou recusar.`;
     const notifData = { type: 'appointment_request', appointmentId: saved.id };
 
     // Persiste notificação no banco para cada admin/professional poder ver no painel web
@@ -422,12 +434,25 @@ export class AppointmentsService {
     ) {
       const patient = await this.patientRepo.findOneBy({ id: saved.patientId });
       if (patient?.userId) {
-        const displayTime = saved.dateTime.toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' });
+        const tz = 'America/Sao_Paulo';
+        const firstName = patient.fullName.split(' ')[0];
+        const dayLabel = saved.dateTime.toLocaleDateString('pt-BR', {
+          timeZone: tz,
+          weekday: 'long',
+          day: 'numeric',
+          month: 'long',
+        });
+        const hourLabel = saved.dateTime.toLocaleTimeString('pt-BR', {
+          timeZone: tz,
+          hour: '2-digit',
+          minute: '2-digit',
+        });
+
         const confirmed = dto.status === AppointmentStatus.CONFIRMED;
-        const title = confirmed ? 'Sessão confirmada ✓' : 'Sessão não confirmada';
+        const title = confirmed ? '✅ Sessão confirmada!' : '❌ Sessão não confirmada';
         const body = confirmed
-          ? `Sua sessão de ${displayTime} está confirmada. Até lá!`
-          : `Sua solicitação para ${displayTime} não pôde ser aceita. Entre em contato para remarcar.`;
+          ? `Oi, ${firstName}! Sua sessão de ${hourLabel} de ${dayLabel} está confirmada. Te esperamos lá! 🌟`
+          : `Oi, ${firstName}! Infelizmente sua solicitação para ${dayLabel} às ${hourLabel} não pôde ser aceita. Entre em contato pelo chat para remarcar. 💬`;
 
         void this.notificationsService
           .sendPushAndPersist(
