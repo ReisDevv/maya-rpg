@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Body, Request, Response, UnauthorizedException, Patch } from '@nestjs/common';
+import { Controller, Post, Get, Body, Request, Res, UnauthorizedException, Patch } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
 import type { Request as ExpressRequest, Response as ExpressResponse, CookieOptions } from 'express';
 
@@ -51,23 +51,26 @@ export class AuthController {
   @Post('login')
   async login(
     @Request() req: ExpressRequest,
-    @Response() res: ExpressResponse,
+    @Res({ passthrough: true }) res: ExpressResponse,
     @Body() dto: LoginDto,
   ) {
-    const result = await this.authService.login(dto, { ip: req.ip, ua: req.headers['user-agent'] });
+    const result = await this.authService.login(dto, { ip: req.ip, ua: req.headers['user-agent'] }) as { accessToken: string; refreshToken: string; [key: string]: unknown };
 
     if (isWebClient(req)) {
       res.cookie('refreshToken', result.refreshToken, REFRESH_COOKIE_OPTIONS);
       const { refreshToken: _rt, ...payload } = result;
-      return res.json(payload);
+      return payload;
     }
 
-    return res.json(result);
+    return result;
   }
 
   @Public()
   @Post('refresh')
-  async refresh(@Request() req: ExpressRequest, @Response() res: ExpressResponse) {
+  async refresh(
+    @Request() req: ExpressRequest,
+    @Res({ passthrough: true }) res: ExpressResponse,
+  ) {
     const web = isWebClient(req);
     const refreshToken: string | undefined = web
       ? (req.cookies as Record<string, string>)?.refreshToken
@@ -83,10 +86,10 @@ export class AuthController {
 
     if (web) {
       res.cookie('refreshToken', newRefreshToken, REFRESH_COOKIE_OPTIONS);
-      return res.json({ accessToken });
+      return { accessToken };
     }
 
-    return res.json({ accessToken, refreshToken: newRefreshToken });
+    return { accessToken, refreshToken: newRefreshToken };
   }
 
   @Public()
@@ -200,7 +203,10 @@ export class AuthController {
 
   @Public()
   @Post('logout')
-  async logout(@Request() req: ExpressRequest, @Response() res: ExpressResponse) {
+  async logout(
+    @Request() req: ExpressRequest,
+    @Res({ passthrough: true }) res: ExpressResponse,
+  ) {
     const web = isWebClient(req);
     const refreshToken: string | undefined = web
       ? (req.cookies as Record<string, string>)?.refreshToken
@@ -212,7 +218,7 @@ export class AuthController {
       res.clearCookie('refreshToken', { path: '/api/auth/refresh' });
     }
 
-    return res.json({ message: 'Logout realizado' });
+    return { message: 'Logout realizado' };
   }
 
   @Roles(UserRole.PATIENT, UserRole.PROFESSIONAL, UserRole.ADMIN)
