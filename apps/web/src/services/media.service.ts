@@ -9,10 +9,10 @@ export const mediaService = {
     return data;
   },
 
-  async uploadMultiple(files: FileList): Promise<{ urls: string[] }> {
+  async uploadMultiple(files: File[]): Promise<string[]> {
     const formData = new FormData();
-    Array.from(files).forEach((file) => formData.append("files", file));
-    const { data } = await api.post<{ urls: string[] }>("upload/multiple", formData);
-    return data;
+    files.forEach((file) => formData.append("files", file));
+    const { data } = await api.post<{ files: { url: string }[] }>("upload/multiple", formData);
+    return data.files.map((f) => f.url);
   },
 };
